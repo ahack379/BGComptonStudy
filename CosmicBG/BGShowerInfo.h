@@ -17,6 +17,7 @@
 
 #include "Analysis/ana_base.h"
 #include "DistToBoxWall.h"
+#include <vector>
 
 namespace larlite {
 
@@ -52,11 +53,16 @@ namespace larlite {
     double _energyElec ;
     double _energyMuon ;    
 
-	double 
+	double _dist_ToWall ;
+	double _dist_AlongTraj ;
+	double _dist_BackAlongTraj ;
 
 	std::vector<double>  _elecVtx ;
 	std::vector<double>  _gammaVtx ;
 	std::vector<double>  _muonVtx ;
+	
+	std::vector<double> _elecMom ;
+	std::vector<double> _gammMom ;
 	
 
   };
