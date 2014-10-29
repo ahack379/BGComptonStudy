@@ -6,15 +6,15 @@
 #define LARLITE_GEOALGO_TYPEDEF_H
 
 // Header files included here
-#include "sample_ana.h"
 #include "DistToBoxWall.h"
 #include "GeoAlgoException.h"
+#include "PointToLineDist.h"
+#include "TwoLineIntersection.h"
+#include "TrajectoryInVolume.h"
 //ADD_NEW_HEADER ... do not change this comment line
 
 // Class forward declaration here
 namespace larlite {
-
-  class sample_ana;
 
 //ADD_ANA_CLASS ... do not change this comment line
 
@@ -22,8 +22,16 @@ namespace larlite {
 
   class DistToBoxWall;
   class GeoAlgoException;
+  class PointToLineDist;
+  class TwoLineIntersection;
+  class TrajectoryInVolume;
 //ADD_EMPTY_CLASS ... do not change this comment line
 #endif
+
+
+
+
+
 
 
 
