@@ -66,7 +66,7 @@ namespace geoalgo {
 	if( (point[0] < _xyz_min[0] || _xyz_max[0] < point[0]) || // point is outside X boundaries OR
   	(point[1] < _xyz_min[1] || _xyz_max[1] < point[1]) || // point is outside Y boundaries OR
    	(point[2] < _xyz_min[2] || _xyz_max[2] < point[2]) )  // point is outside Z boundaries 
-		return -1; 
+		return -99; 
 
 	//
     // (2) Compute the distance to the YZ wall
@@ -134,7 +134,7 @@ double DistToBoxWall::DistanceToWall(std::vector<double> const& point,
 	if( (point[0] < _xyz_min[0] || _xyz_max[0] < point[0]) || // point is outside X boundaries OR
     (point[1] < _xyz_min[1] || _xyz_max[1] < point[1]) || // point is outside Y boundaries OR
     (point[2] < _xyz_min[2] || _xyz_max[2] < point[2]) )  // point is outside Z boundaries 
-	return -1;
+	return -99;
 
 	//
 	// (2) Normalize dir vector

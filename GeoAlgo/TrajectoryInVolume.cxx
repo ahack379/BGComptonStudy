@@ -94,6 +94,16 @@ bool TrajectoryInVolume::PointInVolume(std::vector<float> point){
   return false;
 }
 
+bool TrajectoryInVolume::PointInVolume(std::vector<double> point){
+
+  if ( (point.at(0) > _xMin) and (point.at(0) < _xMax) and
+       (point.at(1) > _yMin) and (point.at(1) < _yMax) and
+       (point.at(2) > _zMin) and (point.at(2) < _zMax) )
+    return true;
+  
+  return false;
+}
+
 double TrajectoryInVolume::Distance(std::vector<float> point1, std::vector<float> point2){
   
   double dist = sqrt( (point1.at(0)-point2.at(0))*(point1.at(0)-point2.at(0)) +

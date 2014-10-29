@@ -56,6 +56,9 @@ public:
   /// See if point in volume
   bool PointInVolume(std::vector<float> point);
 
+  /// See if point in volume
+  bool PointInVolume(std::vector<double> point);
+
   /// Measure distance between two points
   double Distance(std::vector<float> point1, std::vector<float> point2);
   

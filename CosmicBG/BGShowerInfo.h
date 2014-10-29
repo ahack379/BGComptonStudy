@@ -17,6 +17,7 @@
 
 #include "Analysis/ana_base.h"
 #include "DistToBoxWall.h"
+#include "TrajectoryInVolume.h"
 #include <vector>
 
 namespace larlite {
@@ -57,13 +58,21 @@ namespace larlite {
 	double _dist_AlongTraj ;
 	double _dist_BackAlongTraj ;
 
+	double _inVolElecX ;
+	double _inVolElecY ;
+	double _inVolElecZ ;
+
 	std::vector<double>  _elecVtx ;
 	std::vector<double>  _gammaVtx ;
 	std::vector<double>  _muonVtx ;
 	
 	std::vector<double> _elecMom ;
-	std::vector<double> _gammMom ;
-	
+	std::vector<double> _gammaMom ;
+	std::vector<double> _muonMom ;
+
+	int _count0 ;
+	int _count1 ;
+	int _count2 ;
 
   };
 }
