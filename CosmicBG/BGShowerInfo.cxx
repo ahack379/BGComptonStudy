@@ -23,38 +23,54 @@ namespace larlite {
     }
 
     for( auto const & mct : * my_mctruth){
-      std::cout<<"This is a test "<<std::endl;
-    }    
-/*        for(auto const& mcp : mct.GetParticles()) {
+
+		std::cout<<"Size of GetPArticles: "<<mct.GetParticles().size() <<std::endl; 
+        
+        for(auto const& mcp : mct.GetParticles()) {
     
 
-//			_energyGamma = mcp.Trajectory().at(0).E() ;
+			//std::cout<<"Process was: "<<mcp.Process()<<std::endl; 
 
                if (mcp.PdgCode() ==11){
+				std::cout<<"This is an electron"<<std::endl;
                     _elecOrGamma = 0;
                     _energyGamma = mcp.Trajectory().at(0).E() ;
+					_elecVtx = { mcp.Trajectory().at(0).X(), 
+				                 mcp.Trajectory().at(0).Y(),
+    		        			 mcp.Trajectory().at(0).Z() };
+
+				    geoalgo::DistToBoxWall showerObject ;
+    
+   	                _dist_ToWall        = showerObject.DistanceToWall(_elecVtx) ;
+	                _dist_AlongTraj     = showerObject.DistanceToWall(_elecVtx,_elecMom,1);
+    	            _dist_BackAlongTraj = showerObject.DistanceToWall(_elecVtx,_elecMom,0);
+
+
+
     
                  }   
                 else if(mcp.PdgCode() ==22){
+			//	std::cout<<"This is a gamma"<<std::endl;
                     _elecOrGamma = 1;   
                     _energyElec = mcp.Trajectory().at(0).E() ;
                 }   
 
-      //Also look at case where gamma has muon parent
+      		//Also look at case where gamma has muon parent
  				else if(mcp.PdgCode() == 13){
+		//		std::cout<<"This is a muon"<<std::endl;
                     _muonParent = 1 ; 
                     _energyMuon = mcp.Trajectory().at(0).E() ;
 
                 }    
 
-            }*/
+            }
 
 
 
-    //if(_ana_tree)
-    //      _ana_tree->Fill();
+    if(_ana_tree)
+          _ana_tree->Fill();
 
-    //}
+    }
 
     return true;
   }

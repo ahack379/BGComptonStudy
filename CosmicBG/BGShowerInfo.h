@@ -16,6 +16,7 @@
 #define LARLITE_BGSHOWERINFO_H
 
 #include "Analysis/ana_base.h"
+#include "DistToBoxWall.h"
 
 namespace larlite {
 
@@ -50,6 +51,13 @@ namespace larlite {
     double _energyGamma;
     double _energyElec ;
     double _energyMuon ;    
+
+	double 
+
+	std::vector<double>  _elecVtx ;
+	std::vector<double>  _gammaVtx ;
+	std::vector<double>  _muonVtx ;
+	
 
   };
 }
