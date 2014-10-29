@@ -13,7 +13,8 @@ OBJECTS = $(SOURCES:.cxx=.o)
 # include options for this package
 INCFLAGS = -I.                       #Include itself
 INCFLAGS += -I$(LARLITE_COREDIR)
-INCFLAGS += -I$(LARLITE_USERDEVDIR)/BGCosmicStudy/GeoAlgo
+INCFLAGS += -I$(LARLITE_USERDEVDIR)/BGComptonStudy/GeoAlgo/
+
 
 # platform-specific options
 OSNAME          = $(shell uname -s)

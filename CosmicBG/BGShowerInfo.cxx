@@ -39,6 +39,10 @@ namespace larlite {
 				                 mcp.Trajectory().at(0).Y(),
     		        			 mcp.Trajectory().at(0).Z() };
 
+                   _elecMom = {mcp.Trajectory().at(0).Px(), mcp.Trajectory().at(0).Py(), mcp.Trajectory().at(0).Pz()};
+  
+
+
 				    geoalgo::DistToBoxWall showerObject ;
     
    	                _dist_ToWall        = showerObject.DistanceToWall(_elecVtx) ;
