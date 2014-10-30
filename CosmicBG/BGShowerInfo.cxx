@@ -13,7 +13,6 @@ namespace larlite {
 
 	_count0 = 0;
 	_count1 = 0;
-	_count2 = 0;
 
    return true;
   }
@@ -33,67 +32,55 @@ namespace larlite {
 	  return true;
 	}
 
+	    geoalgo::DistToBoxWall showerObject ;
+		TrajectoryInVolume inVol ;
+		inVol.SetVolume(0,256,-116,116,0,1037) ;
 
- //   for( auto const & mct : * my_mctruth){
-
-//		std::cout<<"Size of GetPArticles: "<<mct.GetParticles().size() <<std::endl; 
-        
-   //     for(auto const& mcp : mct.GetParticles()) {
-    
 		for(auto const & mcp : * my_mcpart){
 
-//			std::cout<<"Daughter thing: "<<mcp.Daughters().count(10)<<std::endl;
+               if (mcp.PdgCode() == 11 && mcp.Process() == "compt"){
 
-               if (mcp.PdgCode() == 11){
-
-
-				    geoalgo::DistToBoxWall showerObject ;
-					TrajectoryInVolume inVol ;
-					
-					inVol.SetVolume(0,256,-116,116,0,1037) ;
 					_elecVtx = { mcp.Trajectory().at(0).X(), mcp.Trajectory().at(0).Y(), mcp.Trajectory().at(0).Z() };
 
-				if ( inVol.PointInVolume(_elecVtx)&& mcp.Process()=="compt" ){
+				if ( inVol.PointInVolume(_elecVtx) && mcp.Process()=="compt" ){
 
-                    _elecOrGamma = 0;
-                    _energyElec = mcp.Trajectory().at(0).E() ;
-
+					_energyElec = mcp.Trajectory().at(0).E() ;
                     _elecMom = { mcp.Trajectory().at(0).Px(), mcp.Trajectory().at(0).Py(), mcp.Trajectory().at(0).Pz()};
 
 					_inVolElecX = _elecVtx[0];
 					_inVolElecY = _elecVtx[1];
 					_inVolElecZ = _elecVtx[2];
 
-					_count1 ++ ;
    	                _dist_ToWall        = showerObject.DistanceToWall(_elecVtx) ;
-	                _dist_AlongTraj     = showerObject.DistanceToWall(_elecVtx,_gammaMom,1);
-    	            _dist_BackAlongTraj = showerObject.DistanceToWall(_elecVtx,_gammaMom,0);
-    			if(_ana_tree)
-          			_ana_tree->Fill();
-					}
-    
+	                _dist_AlongTraj     = showerObject.DistanceToWall(_elecVtx,_elecMom,1);
+    	            _dist_BackAlongTraj = showerObject.DistanceToWall(_elecVtx,_elecMom,0);
 
+
+					}
                  }   
 
-                else if(mcp.PdgCode() == 22){
-					
-                    _elecOrGamma = 1;   
-                    _energyGamma = mcp.Trajectory().at(0).E() ;
+				else if(mcp.PdgCode() == -11 && mcp.Process()=="conv" ) {
 
-					_gammaVtx = { mcp.Trajectory().at(0).X(), mcp.Trajectory().at(0).Y(), mcp.Trajectory().at(0).Z() };
-                    _gammaMom = { mcp.Trajectory().at(0).Px(), mcp.Trajectory().at(0).Py(), mcp.Trajectory().at(0).Pz()};
+				  _positronVtx = { mcp.Trajectory().at(0).X(), mcp.Trajectory().at(0).Y(), mcp.Trajectory().at(0).Z() };
 
-                }   
+				  if ( inVol.PointInVolume(_positronVtx) && mcp.Process()=="conv" ){
+					int	MotherID =  mcp.Mother() ;
+                    _positronMom = { mcp.Trajectory().at(0).Px(), mcp.Trajectory().at(0).Py(), mcp.Trajectory().at(0).Pz()};
+					for(auto const& mcp2 : * my_mcpart){
+					  if(mcp2.TrackId() ==MotherID ){
+                        _energyGammaBegin = mcp2.Trajectory().at(0).E() ;
+                        _energyGammaEnd = mcp2.Trajectory().at(mcp2.Trajectory().size()-2).E() ;
+							}
+						}
+    				if(_ana_tree)
+          				_ana_tree->Fill();
+                	 }   
+
+    		 	  }
 
 
- 				else if(mcp.PdgCode() == 13){
-                    _muonParent = 1 ; 
-                    _energyMuon = mcp.Trajectory().at(0).E() ;
-
-                }    
-
-	
-    }
+			}
+		
 
     return true;
   }
@@ -103,16 +90,14 @@ void BGShowerInfo::PrepareTTree() {
     if(!_ana_tree) {
       _ana_tree = new TTree("ana_tree","");
 
-      _ana_tree->Branch("_elecOrGamma",&_elecOrGamma,"elecOrGamma/D") ;
    
-      _ana_tree->Branch("_energyGamma",&_energyGamma,"energyGamma/D") ;
+      _ana_tree->Branch("_energyGammaBegin",&_energyGammaBegin,"energyGammaBegin/D") ;
+      _ana_tree->Branch("_energyGammaEnd",&_energyGammaEnd,"energyGammaEnd/D") ;
       _ana_tree->Branch("_energyElec",&_energyElec,"energyElec/D") ;
 
 	  _ana_tree->Branch("_inVolElecX",&_inVolElecX,"inVolElecX/D") ;
 	  _ana_tree->Branch("_inVolElecY",&_inVolElecY,"inVolElecY/D") ;
 	  _ana_tree->Branch("_inVolElecZ",&_inVolElecZ,"inVolElecZ/D") ;
-
-      _ana_tree->Branch("_energyMuon",&_energyMuon,"energyMuon/D") ;
 
 	  _ana_tree->Branch("_dist_ToWall",&_dist_ToWall,"dist_ToWall/D") ;
 	  _ana_tree->Branch("_dist_AlongTraj",&_dist_AlongTraj,"dist_AlongTraj/D") ;
@@ -144,8 +129,6 @@ bool BGShowerInfo::finalize() {
 
       delete _ana_tree;
 	
-	std::cout<<" gammas in detector, gammas from comptons: "<<_count0<<", "<<_count1<<std::endl;
-
     return true;
   }
 

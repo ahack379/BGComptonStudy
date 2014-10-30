@@ -46,33 +46,32 @@ namespace larlite {
 
 	TTree * _ana_tree ;
 
-	//0 for electron 1 for gamma
-    bool _elecOrGamma ;
-    bool _muonParent ;
 
-    double _energyGamma;
+    double _energyGammaBegin;
+    double _energyGammaEnd;
     double _energyElec ;
-    double _energyMuon ;    
 
 	double _dist_ToWall ;
 	double _dist_AlongTraj ;
 	double _dist_BackAlongTraj ;
-
+	
 	double _inVolElecX ;
 	double _inVolElecY ;
 	double _inVolElecZ ;
 
+	double _inVolGammaX ;
+	double _inVolGammaY ;
+	double _inVolGammaZ ;
+
 	std::vector<double>  _elecVtx ;
 	std::vector<double>  _gammaVtx ;
-	std::vector<double>  _muonVtx ;
+	std::vector<double>  _positronVtx ;
 	
 	std::vector<double> _elecMom ;
-	std::vector<double> _gammaMom ;
-	std::vector<double> _muonMom ;
+	std::vector<double> _positronMom ;
 
 	int _count0 ;
 	int _count1 ;
-	int _count2 ;
 
   };
 }
