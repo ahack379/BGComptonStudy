@@ -80,6 +80,22 @@ namespace larlite {
 
 
 			}
+
+	std::vector<double> temp_gamma_vtx(3,0) ; 
+	for( auto const & mcp : * my_mcpart) {
+
+			temp_gamma_vtx[0] = mcp.Trajectory().at(0).X() ;
+			temp_gamma_vtx[1] = mcp.Trajectory().at(0).Y() ;
+			temp_gamma_vtx[2] = mcp.Trajectory().at(0).Z() ;
+	
+		if(mcp.PdgCode() == 22 && inVol.PointInVolume(temp_gamma_vtx)){ 
+			_energyGammaTotal = mcp.Trajectory().at(0).E() ;
+	
+		if(_gamma_tree)
+			_gamma_tree->Fill() ;
+			}
+		}
+		
 		
 
     return true;
@@ -103,8 +119,15 @@ void BGShowerInfo::PrepareTTree() {
 	  _ana_tree->Branch("_dist_AlongTraj",&_dist_AlongTraj,"dist_AlongTraj/D") ;
 	  _ana_tree->Branch("_dist_BackAlongTraj",&_dist_BackAlongTraj,"dist_BackAlongTraj/D") ;
 
-
     }
+
+	if(!_gamma_tree){
+
+	  _gamma_tree = new TTree("gamma_tree","");
+
+	  _gamma_tree->Branch("_energyGammaTotal",&_energyGammaTotal,"energyGammaTotal/D") ;
+
+		}
  }
 
 void BGShowerInfo::Clear() {
@@ -121,13 +144,16 @@ bool BGShowerInfo::finalize() {
     if(_fout) {
 
       _fout->cd();
-      if(_ana_tree)
+      if(_ana_tree && _gamma_tree ){
         _ana_tree->Write();
+		_gamma_tree->Write();
+		}
       }
      else
        print(larlite::msg::kERROR,__FUNCTION__,"Did not find an output file pointer!!! File not opened?");
 
       delete _ana_tree;
+	  delete _gamma_tree;
 	
     return true;
   }

@@ -45,11 +45,14 @@ namespace larlite {
     protected:
 
 	TTree * _ana_tree ;
+	TTree * _gamma_tree ;
 
 
     double _energyGammaBegin;
     double _energyGammaEnd;
     double _energyElec ;
+
+	double _energyGammaTotal ;
 
 	double _dist_ToWall ;
 	double _dist_AlongTraj ;
