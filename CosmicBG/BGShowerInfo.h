@@ -3,7 +3,7 @@
  *
  * \ingroup CosmicBG
  * 
- * \brief Class def header for a class BGShowerInfo
+ * \This class builds several trees to investigate pp and compton scattering from cosmic gammas. 
  *
  * @author arianaHackenburg
  */
@@ -45,8 +45,9 @@ namespace larlite {
     protected:
 
 	TTree * _ana_tree ;
+	TTree * _pp_tree ;
 	TTree * _gamma_tree ;
-
+	TTree * _gamma_tree2 ;
 
     double _energyGammaBegin;
     double _energyGammaEnd;
@@ -75,6 +76,12 @@ namespace larlite {
 
 	int _count0 ;
 	int _count1 ;
+
+	std::vector<double> energy ;
+	std::vector<double> pp ;
+
+	double _rand ;
+	double _prob ;
 
   };
 }
