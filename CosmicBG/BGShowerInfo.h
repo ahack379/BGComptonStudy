@@ -43,45 +43,62 @@ namespace larlite {
     virtual bool finalize();
 
     protected:
-
+	//ana_tree currently deals with electrons 
+	//from compton scatters
 	TTree * _ana_tree ;
 	TTree * _pp_tree ;
 	TTree * _gamma_tree ;
 	TTree * _gamma_tree2 ;
+	TTree * _muon_tree ;
 
+	//Info for PP tree
     double _energyGammaBegin;
     double _energyGammaEnd;
-    double _energyElec ;
+	std::vector<double> _positronVtx ;
 
-	double _energyGammaTotal ;
+	//Info for _gamma_tree2
+	double _rand ;
+	double _prob ;
+	double _checkGammaPP ; 
+
+
+	std::vector<double> energy ;
+	std::vector<double> pp ;
+
+	//Muon Tree
+	double _timeMuonEnter ; 
+	double _timeDiff ;
+
+
+	//Info for _ana_tree
+	double _timeElecEnter ;  //Time the compton scattered electron enters the TPC
+
+	
+	double _inVolElecX ;
+	double _inVolElecY ;
+	double _inVolElecZ ;
+    double _energyElec ;
 
 	double _dist_ToWall ;
 	double _dist_AlongTraj ;
 	double _dist_BackAlongTraj ;
 	
-	double _inVolElecX ;
-	double _inVolElecY ;
-	double _inVolElecZ ;
+	std::vector<double>  _elecVtx ;
+	std::vector<double> _elecMom ;
 
+	//Info for _gamma_tree 
+	double _pdgCode ;
+	double _energyGammaTotal ;
 	double _inVolGammaX ;
 	double _inVolGammaY ;
 	double _inVolGammaZ ;
+	double _timing ;
 
-	std::vector<double>  _elecVtx ;
 	std::vector<double>  _gammaVtx ;
-	std::vector<double>  _positronVtx ;
-	
-	std::vector<double> _elecMom ;
-	std::vector<double> _positronMom ;
 
 	int _count0 ;
 	int _count1 ;
 
-	std::vector<double> energy ;
-	std::vector<double> pp ;
-
-	double _rand ;
-	double _prob ;
 
   };
 }

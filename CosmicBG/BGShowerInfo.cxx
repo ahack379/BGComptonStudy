@@ -9,6 +9,10 @@ namespace larlite {
   bool BGShowerInfo::initialize() {
 
     _ana_tree=0;
+	_gamma_tree = 0;
+	_gamma_tree2 = 0;
+	_pp_tree = 0;
+	_muon_tree = 0;
     PrepareTTree();
 
 	_count0 = 0;
@@ -52,7 +56,29 @@ pp = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 	//3) Check that Pair production rates should be as low as they
 	//	 are given the vectors defined above.
 	for(auto const & mcp : * my_mcpart){
- 		_count0++ ; 
+
+		//Check if muon track makes it through detector
+		//First add traj points to vector
+	/*	if(mcp.PdgCode() ==13  || mcp.PdgCode() == -13){
+			_count1++ ;
+			std::vector<double> _muonTrajPt ; 
+
+			int j=0;
+			for(; j<mcp.Trajectory().size(); j++ ){
+				_muonTrajPt	= {mcp.Trajectory().at(j).X(), mcp.Trajectory().at(j).Y(), mcp.Trajectory().at(j).Z() };
+
+					if(inVol.PointInVolume(_muonTrajPt) ){
+		//				std::cout<<"Tr crosses : "<<_muonTrajPt[0]<<" " <<_muonTrajPt[1]<<" "<<_muonTrajPt[2]<<std::endl;
+						_timeMuonEnter = mcp.Trajectory().at(j).T() ;
+						
+						if(_muon_tree)
+							_muon_tree->Fill();
+						break ;
+
+					  }
+			 }	
+
+		}*/
 
 	   if (mcp.PdgCode() == 11 && mcp.Process() == "compt"){
 			_elecVtx = { mcp.Trajectory().at(0).X(), mcp.Trajectory().at(0).Y(), mcp.Trajectory().at(0).Z() };
@@ -61,6 +87,9 @@ pp = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 
 				_energyElec = mcp.Trajectory().at(0).E() ;
 				_elecMom = { mcp.Trajectory().at(0).Px(), mcp.Trajectory().at(0).Py(), mcp.Trajectory().at(0).Pz()};
+				_timeElecEnter = mcp.Trajectory().at(0).T() ;
+				
+				_timing = (- mcp.Trajectory().at(0).T() + mcp.Trajectory().at(mcp.Trajectory().size()-1).T()) ;
 
 				_inVolElecX = _elecVtx[0];
 				_inVolElecY = _elecVtx[1];
@@ -69,6 +98,44 @@ pp = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 				_dist_ToWall        = showerObject.DistanceToWall(_elecVtx) ;
 				_dist_AlongTraj     = showerObject.DistanceToWall(_elecVtx,_elecMom,1);
 				_dist_BackAlongTraj = showerObject.DistanceToWall(_elecVtx,_elecMom,0);
+
+				int	MotherID2 =  mcp.Mother() ;
+				int MotherIDMuon = 0;
+
+				//Get the mother gamma
+				for(auto const& mcp2 : * my_mcpart){
+				    if(mcp2.TrackId() == MotherID2 ){ 
+					//	_pdgCode = mcp2.PdgCode() ;  
+						MotherIDMuon = mcp2.Mother();
+				//		std::cout<<"trackID and mother: "<<mcp2.PdgCode()<<" " <<mcp2.Mother() <<" " <<mcp2.TrackId() <<"  "<<MotherID2<<std::endl ; }
+						for(auto const & mcp3 : *my_mcpart){
+							if(mcp3.TrackId() == MotherIDMuon &&( mcp3.PdgCode() == 13 || mcp3.PdgCode()==-13 )){
+
+								std::vector<double> _muonTrajPt ; 
+	
+								int j=0;
+								for(; j<mcp3.Trajectory().size(); j++ ){
+									_muonTrajPt	= {mcp.Trajectory().at(j).X(), mcp.Trajectory().at(j).Y(), mcp.Trajectory().at(j).Z() };
+
+									if(inVol.PointInVolume(_muonTrajPt) ){
+									_timeMuonEnter = mcp.Trajectory().at(j).T() ;
+									_timeDiff = _timeMuonEnter - _timeElecEnter ;
+						
+									if(_muon_tree)
+										_muon_tree->Fill();
+									break ;
+									  }
+								  }
+
+								break;
+							
+								}	
+							}
+
+					
+						}
+
+					} 
 
 				if(_ana_tree)	
 					_ana_tree->Fill();
@@ -81,7 +148,7 @@ pp = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 
 			  if ( inVol.PointInVolume(_positronVtx) ){
 				int	MotherID =  mcp.Mother() ;
-				_positronMom = { mcp.Trajectory().at(0).Px(), mcp.Trajectory().at(0).Py(), mcp.Trajectory().at(0).Pz()};
+
 				for(auto const& mcp2 : * my_mcpart){
 				    if(mcp2.TrackId() ==MotherID ){
 						_energyGammaBegin = mcp2.Trajectory().at(0).E() ;
@@ -95,9 +162,10 @@ pp = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 			 	 }
 			
 			else if ( mcp.PdgCode()==22){
-				std::vector<double> temp_gamma_vtx(3,0) ; 
+			////////////////////////PairProd check
 				_rand = drand48() ;
 
+				std::vector<double> temp_gamma_vtx(3,0) ; 
 				temp_gamma_vtx = { mcp.Trajectory().at(0).X(), mcp.Trajectory().at(0).Y(), temp_gamma_vtx[2] = mcp.Trajectory().at(0).Z() };
 
 				if(inVol.PointInVolume(temp_gamma_vtx)) {
@@ -105,6 +173,7 @@ pp = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 					_inVolGammaX = temp_gamma_vtx[0]; 
 					_inVolGammaY = temp_gamma_vtx[1]; 
 					_inVolGammaZ = temp_gamma_vtx[2]; 
+
 
 					int j=0;
 					while(j < energy.size()){
@@ -118,11 +187,13 @@ pp = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 						_checkGammaPP = _energyGammaTotal ;
 						_gamma_tree2->Fill() ;
 						}
+			//////////////////////////PairProd check end
+
 
 					if(_gamma_tree)
 						_gamma_tree->Fill() ;
-
 					}
+
 				}
 		}				
 
@@ -134,11 +205,15 @@ void BGShowerInfo::PrepareTTree() {
     if(!_ana_tree) {
       _ana_tree = new TTree("ana_tree","");
 
+	  _ana_tree->Branch("_timeElecEnter",&_timeElecEnter,"timeElecEnter/D");
+	  _ana_tree->Branch("_timing",&_timing,"timing/D"); 
    
       _ana_tree->Branch("_energyElec",&_energyElec,"energyElec/D") ;
 	  _ana_tree->Branch("_inVolElecX",&_inVolElecX,"inVolElecX/D") ;
 	  _ana_tree->Branch("_inVolElecY",&_inVolElecY,"inVolElecY/D") ;
 	  _ana_tree->Branch("_inVolElecZ",&_inVolElecZ,"inVolElecZ/D") ;
+	  //_ana_tree->Branch("_pdgCode",&_pdgCode,"pdgCode/D") ;
+
 
 	  _ana_tree->Branch("_dist_ToWall",&_dist_ToWall,"dist_ToWall/D") ;
 	  _ana_tree->Branch("_dist_AlongTraj",&_dist_AlongTraj,"dist_AlongTraj/D") ;
@@ -163,6 +238,7 @@ void BGShowerInfo::PrepareTTree() {
 	  _gamma_tree->Branch("_inVolGammaZ",&_inVolGammaZ,"inVolGammaZ/D") ;
 
 
+
 		}
 	
 	if(!_gamma_tree2){
@@ -171,6 +247,16 @@ void BGShowerInfo::PrepareTTree() {
 
 	  _gamma_tree2->Branch("_rand",&_rand,"rand/D") ;
 	  _gamma_tree2->Branch("_checkGammaPP",&_checkGammaPP,"checkGammaPP/D") ;
+	
+	}
+
+	if(!_muon_tree){
+	
+	_muon_tree = new TTree("muon_tree","");
+
+	_muon_tree->Branch("_timeMuonEnter",&_timeMuonEnter,"timeMuonEnter/D") ;
+	_muon_tree->Branch("_timeDiff",&_timeDiff,"timeDiff/D");
+	
 	
 	}
 
@@ -189,24 +275,24 @@ bool BGShowerInfo::finalize() {
     if(_fout) {
 
       _fout->cd();
-      if(_ana_tree && _gamma_tree && _pp_tree && _gamma_tree2){
+      if(_ana_tree && _gamma_tree && _pp_tree && _gamma_tree2 && _muon_tree){
         _ana_tree->Write();
 		_gamma_tree->Write();
 		_gamma_tree2->Write();
 		_pp_tree->Write();
+		_muon_tree->Write() ;
 		}
       }
      else
        print(larlite::msg::kERROR,__FUNCTION__,"Did not find an output file pointer!!! File not opened?");
 
-	 std::cout<<"All particles! : "<<_count0
-		 <<"\nG total : "<<std::endl;
+	 std::cout<<"Muons ! : "<<_count1<<std::endl;
 
-	
       delete _ana_tree;
 	  delete _gamma_tree;
 	  delete _gamma_tree2;
 	  delete _pp_tree;
+	  delete _muon_tree ;
 	
     return true;
   }
