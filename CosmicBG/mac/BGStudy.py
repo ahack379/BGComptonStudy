@@ -14,11 +14,11 @@ from ROOT import larlite as fmwk
 # Create ana_processor instance
 my_proc = fmwk.ana_processor()
 
-#for x in xrange(len(sys.argv)-6):
-#    my_proc.add_input_file(sys.argv[x+1])
+for x in xrange(len(sys.argv)-1):
+    my_proc.add_input_file(sys.argv[x+1])
 
 # Set input root file
-my_proc.add_input_file(sys.argv[1])
+#my_proc.add_input_file(sys.argv[1])
 
 # Specify IO mode
 my_proc.set_io_mode(fmwk.storage_manager.kREAD)
@@ -32,7 +32,7 @@ if len(sys.argv) > 2:
 my_proc.set_ana_output_file("out.root");
 
 # Attach a template process
-my_proc.add_process(fmwk.BGShowerInfo());
+my_proc.add_process(fmwk.CosmicsInfo());
 
 print
 print  "Finished configuring ana_processor. Start event loop!"

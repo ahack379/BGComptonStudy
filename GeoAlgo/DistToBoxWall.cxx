@@ -29,7 +29,7 @@ namespace geoalgo {
     
     _xyz_max[0] = 256.;
     _xyz_max[1] = 116.;
-    _xyz_max[2] = 1030.;
+    _xyz_max[2] = 1037.;
   }
   
   double DistToBoxWall::DistanceToWall(std::vector<double> const& point) const

@@ -19,6 +19,7 @@
 #include "DistToBoxWall.h"
 #include "TrajectoryInVolume.h"
 #include <vector>
+#include <string>
 
 namespace larlite {
 
@@ -54,30 +55,40 @@ namespace larlite {
 	//Info for PP tree
     double _energyGammaBegin;
     double _energyGammaEnd;
+
+	double _inVolPosX ;
+	double _inVolPosY ;
+	double _inVolPosZ ;
+
+	double _pxPP ;
+	double _pyPP ;
+	double _pzPP ;
+	double _energyPP ;
+	
+	double _gammaPPX ;
+	double _gammaPPY ;
+	double _gammaPPZ ;
+
+	double _dist_BackAlongTrajPP ;
 	std::vector<double> _positronVtx ;
-
-	//Info for _gamma_tree2
-	double _rand ;
-	double _prob ;
-	double _checkGammaPP ; 
-
-
-	std::vector<double> energy ;
-	std::vector<double> pp ;
-
-	//Muon Tree
-	double _timeMuonEnter ; 
-	double _timeDiff ;
+	std::vector<double> _ppMom ;
 
 
 	//Info for _ana_tree
 	double _timeElecEnter ;  //Time the compton scattered electron enters the TPC
-
 	
 	double _inVolElecX ;
 	double _inVolElecY ;
 	double _inVolElecZ ;
+
+	double _pxElec ;
+	double _pyElec ;
+	double _pzElec ;
     double _energyElec ;
+
+	double _gammaCompX ;
+	double _gammaCompY ;
+	double _gammaCompZ ;
 
 	double _dist_ToWall ;
 	double _dist_AlongTraj ;
@@ -87,6 +98,10 @@ namespace larlite {
 	std::vector<double> _elecMom ;
 
 	//Info for _gamma_tree 
+	std::string _process ;
+	double _energyMother ;
+	double _parents ;
+	double _parentsCut ;
 	double _pdgCode ;
 	double _energyGammaTotal ;
 	double _inVolGammaX ;
@@ -95,6 +110,19 @@ namespace larlite {
 	double _timing ;
 
 	std::vector<double>  _gammaVtx ;
+
+	//Info for _gamma_tree2
+	double _rand ;
+	double _prob ;
+	double _checkGammaPP ; 
+
+	//Muon Tree
+	double _timeMuonEnter ; 
+	double _timeDiff ;
+
+	std::vector<double> energy ;
+	std::vector<double> pp ;
+
 
 	int _count0 ;
 	int _count1 ;

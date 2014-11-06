@@ -7,18 +7,22 @@
 
 // Header files included here
 #include "BGShowerInfo.h"
+#include "CosmicsInfo.h"
 //ADD_NEW_HEADER ... do not change this comment line
 
 // Class forward declaration here
 namespace larlite {
 
   class BGShowerInfo;
+  class CosmicsInfo;
 //ADD_ANA_CLASS ... do not change this comment line
 
 }
 
 //ADD_EMPTY_CLASS ... do not change this comment line
 #endif
+
+
 
 
 

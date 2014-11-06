@@ -43,12 +43,15 @@ public:
 
   /// Add Trajectory point
   void AddTrajectoryPoint(std::vector<float> point);
+  void AddTrajectoryPoint(std::vector<double> point);
+
 
   /// See if a list of trajectory points intersects the volume
   bool IsInVolume();
 
   /// See if a list of trajectory points intersects the volume
   bool IsInVolume(std::vector<std::vector<float> > traj);
+  bool IsInVolume(std::vector<std::vector<double> > traj);
 
   /// See if Line intersects volume
   bool LineInVolume(std::vector<float> point1, std::vector<float> point2);

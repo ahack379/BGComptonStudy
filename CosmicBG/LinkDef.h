@@ -10,9 +10,12 @@
 #pragma link off all functions;
 
 #pragma link C++ class larlite::BGShowerInfo+;
+#pragma link C++ class larlite::CosmicsInfo+;
 //ADD_NEW_CLASS ... do not change this line
 
 #endif
+
+
 
 
 
