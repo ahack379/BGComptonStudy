@@ -26,7 +26,7 @@ namespace larlite {
 
 	geoalgo::DistToBoxWall showerObject ;
 	TrajectoryInVolume inVol ;
-	inVol.SetVolume(0,256,-116,116,0,1037) ;
+	inVol.SetVolume(0,256.35,-116.5,116.5,0,1036.8) ;
 
 	for(auto const & mcp : * my_mcpart){
 
