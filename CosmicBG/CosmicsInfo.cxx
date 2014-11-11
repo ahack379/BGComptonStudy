@@ -32,30 +32,6 @@ namespace larlite {
 
 		Reset();
 
-		_run = my_mcpart->run() ;
-		_subrun = my_mcpart->subrun();
-		_event = my_mcpart->event_id(); 
-
-		_PDG = mcp.PdgCode() ;
-		_trackID = mcp.TrackId() ;
-		_process= mcp.Process() ;
-
-		_X = mcp.Trajectory().at(0).X() ;
-		_Y = mcp.Trajectory().at(0).Y() ;
-		_Z = mcp.Trajectory().at(0).Z() ;
-		_T = mcp.Trajectory().at(0).T() ;
-
-		_Px = mcp.Trajectory().at(0).Px() ;
-		_Py = mcp.Trajectory().at(0).Py() ;
-		_Pz = mcp.Trajectory().at(0).Pz() ;
-		_E = mcp.Trajectory().at(0).E() ;
-
-		std::vector<double> _vtx = { _X, _Y, _Z } ;
-		std::vector<double> _mom = { _Px, _Py, _Pz } ;
-
-		_distAlongTraj     = showerObject.DistanceToWall(_vtx,_mom,1);
-		_distBackAlongTraj = showerObject.DistanceToWall(_vtx,_mom,0);
-
 		//Create mcshower-like things
 		if( mcp.PdgCode() == 11 && mcp.Process() == "compt")
 			_PDG = 3 ;
@@ -74,34 +50,85 @@ namespace larlite {
 			   }
 			}
 
-		if( inVol.PointInVolume(_vtx) ){
-			_inVolX = _X ;
-			_inVolY = _Y ;
-			_inVolZ = _Z ;
-			}//if inVol.Po...
-
-		//Get Parent info as well
-		int motherID = mcp.Mother(); 
-		for(auto const & mcp3 : * my_mcpart){
+		//Only save particles which are gammas, pi0s, compton scatters and pair productions
+		if( mcp.PdgCode() == 111 || mcp.PdgCode() == 22 || _PDG ==3 || _PDG ==4 ){
 		
-			if( motherID == mcp3.TrackId()){
-				_parentPDG = mcp3.PdgCode() ;
-
-				_parentX = mcp3.Trajectory().at(0).X();
-				_parentY = mcp3.Trajectory().at(0).Y();
-				_parentZ = mcp3.Trajectory().at(0).Z();
-				_parentT = mcp3.Trajectory().at(0).T();
-
-				_parentPx = mcp3.Trajectory().at(0).Px();
-				_parentPy = mcp3.Trajectory().at(0).Py();
-				_parentPz = mcp3.Trajectory().at(0).Pz();
-				_parentE = mcp3.Trajectory().at(0).E();
+			_run = my_mcpart->run() ;
+			_subrun = my_mcpart->subrun();
+			_event = my_mcpart->event_id(); 
+	
+			_PDG = mcp.PdgCode() ;
+			_trackID = mcp.TrackId() ;
+			_process= mcp.Process() ;
+	
+			_X = mcp.Trajectory().at(0).X() ;
+			_Y = mcp.Trajectory().at(0).Y() ;
+			_Z = mcp.Trajectory().at(0).Z() ;
+			_T = mcp.Trajectory().at(0).T() ;
+	
+			_Px = mcp.Trajectory().at(0).Px() ;
+			_Py = mcp.Trajectory().at(0).Py() ;
+			_Pz = mcp.Trajectory().at(0).Pz() ;
+			_E = mcp.Trajectory().at(0).E() ;
+	
+			std::vector<double> _vtx = { _X, _Y, _Z } ;
+			std::vector<double> _mom = { _Px, _Py, _Pz } ;
+	
+			_distAlongTraj     = showerObject.DistanceToWall(_vtx,_mom,1);
+			_distBackAlongTraj = showerObject.DistanceToWall(_vtx,_mom,0);
+	
+			//Create mcshower-like things
+			if( mcp.PdgCode() == 11 && mcp.Process() == "compt")
+				_PDG = 3 ;
 			
+			if( mcp.PdgCode() == -11 && mcp.Process() == "conv"){
+				_PDG = 4 ;
+				int posMother = mcp.Mother();
+				for(auto const & mcp2 : * my_mcpart){
+					
+					if(posMother == mcp2.TrackId()){
+						_E = mcp2.Trajectory().at(mcp2.Trajectory().size()-2).E() ;
+						_Px = mcp2.Trajectory().at(mcp2.Trajectory().size()-2).Px() ;
+						_Py = mcp2.Trajectory().at(mcp2.Trajectory().size()-2).Py() ;
+						_Pz = mcp2.Trajectory().at(mcp2.Trajectory().size()-2).Pz() ;
+					  }
+				   }
 				}
-		
-			 }
-
-				_ana_tree->Fill();
+	
+			if( inVol.PointInVolume(_vtx) ){
+				_inVolX = _X ;
+				_inVolY = _Y ;
+				_inVolZ = _Z ;
+				}//if inVol.Po...
+	
+			//Get Parent info as well
+			int motherID = mcp.Mother(); 
+			for(auto const & mcp3 : * my_mcpart){
+			
+				if( motherID == mcp3.TrackId()){
+					_parentPDG = mcp3.PdgCode() ;
+	
+					_parentX = mcp3.Trajectory().at(0).X();
+					_parentY = mcp3.Trajectory().at(0).Y();
+					_parentZ = mcp3.Trajectory().at(0).Z();
+					_parentT = mcp3.Trajectory().at(0).T();
+	
+					_parentPx = mcp3.Trajectory().at(0).Px();
+					_parentPy = mcp3.Trajectory().at(0).Py();
+					_parentPz = mcp3.Trajectory().at(0).Pz();
+					_parentE = mcp3.Trajectory().at(0).E();
+	
+					std::vector<double> pVtx = { _parentX, _parentY, _parentZ } ; 
+					std::vector<double> pMom = { _parentPx, _parentPy, _parentPz } ;
+				
+					_parentDistanceBack = showerObject.DistanceToWall(pVtx,pMom,1);
+	
+					}
+			
+				 }
+	
+					_ana_tree->Fill();
+			} //End if statement conditions for which pdgs to save
 		}				
 	
 

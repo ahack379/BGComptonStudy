@@ -85,6 +85,8 @@ namespace larlite {
 	double _parentPz ; 
 	double _parentE ; 
 
+	double _parentDistanceBack ;
+
 	//Not sure where this goes
 	int kCompton = 3 ;
 	int kPairProduce = 4; 
