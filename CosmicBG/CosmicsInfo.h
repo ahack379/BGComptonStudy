@@ -66,9 +66,7 @@ namespace larlite {
 	double _Pz ;
 	double _E ;
 
-	double _inVolX ;
-	double _inVolY ;
-	double _inVolZ ;
+	bool _inActiveVolume ;
 
 	double _distAlongTraj ;
 	double _distBackAlongTraj ;
@@ -85,11 +83,11 @@ namespace larlite {
 	double _parentPz ; 
 	double _parentE ; 
 
-	double _parentDistanceBack ;
+	bool _parentInActiveVolume ;
 
 	//Not sure where this goes
 	int kCompton = 3 ;
-	int kPairProduce = 4; 
+	int kPairProduction = 4; 
 
 
   };

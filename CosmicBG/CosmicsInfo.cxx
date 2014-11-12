@@ -51,7 +51,10 @@ namespace larlite {
 			}
 
 		//Only save particles which are gammas, pi0s, compton scatters and pair productions
-		if( mcp.PdgCode() == 111 || mcp.PdgCode() == 22 || _PDG ==3 || _PDG ==4 ){
+//		if( mcp.PdgCode() == 111 || mcp.PdgCode() == 22 || _PDG == 3 || _PDG == 4 ){
+
+
+			
 		
 			_run = my_mcpart->run() ;
 			_subrun = my_mcpart->subrun();
@@ -73,6 +76,9 @@ namespace larlite {
 	
 			std::vector<double> _vtx = { _X, _Y, _Z } ;
 			std::vector<double> _mom = { _Px, _Py, _Pz } ;
+
+			if(inVol.PointInVolume(_vtx ))
+				_inActiveVolume = 1 ; 
 	
 			_distAlongTraj     = showerObject.DistanceToWall(_vtx,_mom,1);
 			_distBackAlongTraj = showerObject.DistanceToWall(_vtx,_mom,0);
@@ -95,12 +101,6 @@ namespace larlite {
 				   }
 				}
 	
-			if( inVol.PointInVolume(_vtx) ){
-				_inVolX = _X ;
-				_inVolY = _Y ;
-				_inVolZ = _Z ;
-				}//if inVol.Po...
-	
 			//Get Parent info as well
 			int motherID = mcp.Mother(); 
 			for(auto const & mcp3 : * my_mcpart){
@@ -121,14 +121,15 @@ namespace larlite {
 					std::vector<double> pVtx = { _parentX, _parentY, _parentZ } ; 
 					std::vector<double> pMom = { _parentPx, _parentPy, _parentPz } ;
 				
-					_parentDistanceBack = showerObject.DistanceToWall(pVtx,pMom,1);
-	
+					if(inVol.PointInVolume(pVtx ))
+						_inActiveVolume = 0;  
+
 					}
 			
 				 }
 	
 					_ana_tree->Fill();
-			} //End if statement conditions for which pdgs to save
+		//	} //End if statement conditions for which pdgs to save
 		}				
 	
 
@@ -157,11 +158,9 @@ void CosmicsInfo::PrepareTTree() {
 	  _ana_tree->Branch("_Py",&_Py,"Py/D");
 	  _ana_tree->Branch("_Pz",&_Pz,"Pz/D");
 	  _ana_tree->Branch("_E",&_E,"E/D");
-	  
-	  _ana_tree->Branch("_inVolX",&_inVolX,"inVolX/D");
-	  _ana_tree->Branch("_inVolY",&_inVolY,"inVolY/D");
-	  _ana_tree->Branch("_inVolZ",&_inVolZ,"inVolZ/D");
 
+	  _ana_tree->Branch("_inActiveVolume",&_inActiveVolume,"inActiveVolume/D");
+	  
 	  _ana_tree->Branch("_distAlongTraj",&_distAlongTraj,"distAlongTraj/D") ;
 	  _ana_tree->Branch("_distBackAlongTraj",&_distBackAlongTraj,"distBackAlongTraj/D") ;
 
@@ -177,6 +176,8 @@ void CosmicsInfo::PrepareTTree() {
 	  _ana_tree->Branch("_parentPy",&_parentPy,"parentPy/D");
 	  _ana_tree->Branch("_parentPz",&_parentPz,"parentPz/D");
 	  _ana_tree->Branch("_parentE",&_parentE,"parentE/D");
+
+	  _ana_tree->Branch("_parentInActiveVolume",&_parentInActiveVolume,"parentInActiveVolume/D");
 	
 	}
 
@@ -187,6 +188,7 @@ void CosmicsInfo::Clear() {
   }
 
 void CosmicsInfo::Reset(){
+
 
    _run     = -1;
    _subrun  = -1;
@@ -206,10 +208,6 @@ void CosmicsInfo::Reset(){
    _Pz 		= -9999999;
    _E 		= -9999999;
 
-   _inVolX  = -9999999;
-   _inVolY  = -9999999;
-   _inVolZ  = -9999999;
-
    _distAlongTraj     = -9999999;
    _distBackAlongTraj = -9999999;
 
@@ -224,6 +222,9 @@ void CosmicsInfo::Reset(){
    _parentPy  = -9999999;
    _parentPz  = -9999999;
    _parentE   = -9999999;
+
+   _inActiveVolume = -99 ;
+   _parentInActiveVolume = -99 ;
 
  }
 
