@@ -24,9 +24,7 @@ namespace larlite {
 		  return true;
 		}
 
-	geoalgo::DistToBoxWall showerObject ;
-	TrajectoryInVolume inVol ;
-	inVol.SetVolume(0,256.35,-116.5,116.5,0,1036.8) ;
+	_inVol.SetVolume(0,256.35,-116.5,116.5,0,1036.8) ;
 
 	for(auto const & mcp : * my_mcpart){
 
@@ -48,14 +46,11 @@ namespace larlite {
 					_Pz = mcp2.Trajectory().at(mcp2.Trajectory().size()-2).Pz() ;
 				  }
 			   }
-			}
+			}//if positron, conv
 
 		//Only save particles which are gammas, pi0s, compton scatters and pair productions
 //		if( mcp.PdgCode() == 111 || mcp.PdgCode() == 22 || _PDG == 3 || _PDG == 4 ){
-
-
 			
-		
 			_run = my_mcpart->run() ;
 			_subrun = my_mcpart->subrun();
 			_event = my_mcpart->event_id(); 
@@ -74,32 +69,14 @@ namespace larlite {
 			_Pz = mcp.Trajectory().at(0).Pz() ;
 			_E = mcp.Trajectory().at(0).E() ;
 	
-			std::vector<double> _vtx = { _X, _Y, _Z } ;
-			std::vector<double> _mom = { _Px, _Py, _Pz } ;
+			std::vector<double> vtx = { _X, _Y, _Z } ;
+			std::vector<double> mom = { _Px, _Py, _Pz } ;
 
-			if(inVol.PointInVolume(_vtx ))
+			if(_inVol.PointInVolume(vtx ))
 				_inActiveVolume = 1 ; 
 	
-			_distAlongTraj     = showerObject.DistanceToWall(_vtx,_mom,1);
-			_distBackAlongTraj = showerObject.DistanceToWall(_vtx,_mom,0);
-	
-			//Create mcshower-like things
-			if( mcp.PdgCode() == 11 && mcp.Process() == "compt")
-				_PDG = 3 ;
-			
-			if( mcp.PdgCode() == -11 && mcp.Process() == "conv"){
-				_PDG = 4 ;
-				int posMother = mcp.Mother();
-				for(auto const & mcp2 : * my_mcpart){
-					
-					if(posMother == mcp2.TrackId()){
-						_E = mcp2.Trajectory().at(mcp2.Trajectory().size()-2).E() ;
-						_Px = mcp2.Trajectory().at(mcp2.Trajectory().size()-2).Px() ;
-						_Py = mcp2.Trajectory().at(mcp2.Trajectory().size()-2).Py() ;
-						_Pz = mcp2.Trajectory().at(mcp2.Trajectory().size()-2).Pz() ;
-					  }
-				   }
-				}
+			_distAlongTraj     = _showerObject.DistanceToWall(vtx,mom,1);
+			_distBackAlongTraj = _showerObject.DistanceToWall(vtx,mom,0);
 	
 			//Get Parent info as well
 			int motherID = mcp.Mother(); 
@@ -121,14 +98,41 @@ namespace larlite {
 					std::vector<double> pVtx = { _parentX, _parentY, _parentZ } ; 
 					std::vector<double> pMom = { _parentPx, _parentPy, _parentPz } ;
 				
-					if(inVol.PointInVolume(pVtx ))
+					if(_inVol.PointInVolume(pVtx ))
 						_inActiveVolume = 0;  
 
-					}
-			
+				 	}
+				}
+
+			//Adding muons trajectory information for DavidC's SaLSA cuts,etc
+			if(mcp.PdgCode() == 13 || mcp.PdgCode() == -13) {
+				std::cout<<"MUON! "<<std::endl;
+			    std::vector< std::vector< std::vector<double> > > muonTracks;
+				std::vector< std::vector<double> > muonTraj ;
+			    muonTracks.clear();
+				muonTraj.resize(0);
+
+			    for (size_t h=0; h < mcp.Trajectory().size(); h++){
+
+					std::vector<double> muonVtx = { mcp.Trajectory().at(h).X(),
+													mcp.Trajectory().at(h).Y(), 
+													mcp.Trajectory().at(h).Z() };
+
+					if(_inVol.PointInVolume(muonVtx)){   
+					   muonTraj.push_back(muonVtx) ;
+
+						std::cout<<"\n1Muon things : "<<muonVtx[0]<<std::endl;
+						std::cout<<"2Muon things : "<<muonTraj.at(0).at(0) <<std::endl; 
+					 }
 				 }
+				MuonTraj = muonTraj ;
+
+				if(muonTraj.size() >=1 )
+				    muonTracks.push_back(muonTraj);
+
+				}//if muon/ antimuon
 	
-					_ana_tree->Fill();
+				_ana_tree->Fill();
 		//	} //End if statement conditions for which pdgs to save
 		}				
 	
@@ -178,6 +182,8 @@ void CosmicsInfo::PrepareTTree() {
 	  _ana_tree->Branch("_parentE",&_parentE,"parentE/D");
 
 	  _ana_tree->Branch("_parentInActiveVolume",&_parentInActiveVolume,"parentInActiveVolume/D");
+
+	  _ana_tree->Branch("MuonTraj",&MuonTraj) ;
 	
 	}
 

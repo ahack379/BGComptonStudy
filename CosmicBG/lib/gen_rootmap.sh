@@ -17,7 +17,7 @@ rootlibmap() {
 ######################################################
 # CosmicBG
 rootlibmap libBGComptonStudy_CosmicBG.rootmap libBGComptonStudy_CosmicBG.so $LARLITE_USERDEVDIR/BGComptonStudy/CosmicBG/LinkDef.h \
-    libBGComptonStudy_GeoAlgo.so libLArLite_Analysis.so
+    libBasicTool_GeoAlgo.so libLArLite_Analysis.so
 
 
 

@@ -86,9 +86,14 @@ namespace larlite {
 	bool _parentInActiveVolume ;
 
 	//Not sure where this goes
-	int kCompton = 3 ;
-	int kPairProduction = 4; 
+//	int kCompton = 3 ;
+//	int kPairProduction = 4; 
 
+	geoalgo::DistToBoxWall 		 _showerObject;  
+	geoalgo::TrajectoryInVolume	 _inVol ;  
+
+	//Muon things
+	std::vector<std::vector<double>> MuonTraj ; 
 
   };
 }
