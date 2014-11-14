@@ -48,9 +48,6 @@ namespace larlite {
 			   }
 			}//if positron, conv
 
-		//Only save particles which are gammas, pi0s, compton scatters and pair productions
-//		if( mcp.PdgCode() == 111 || mcp.PdgCode() == 22 || _PDG == 3 || _PDG == 4 ){
-			
 			_run = my_mcpart->run() ;
 			_subrun = my_mcpart->subrun();
 			_event = my_mcpart->event_id(); 
@@ -104,36 +101,33 @@ namespace larlite {
 				 	}
 				}
 
+
+
 			//Adding muons trajectory information for DavidC's SaLSA cuts,etc
 			if(mcp.PdgCode() == 13 || mcp.PdgCode() == -13) {
-				std::cout<<"MUON! "<<std::endl;
-			    std::vector< std::vector< std::vector<double> > > muonTracks;
+
+
+
+
+/*				
 				std::vector< std::vector<double> > muonTraj ;
-			    muonTracks.clear();
-				muonTraj.resize(0);
 
 			    for (size_t h=0; h < mcp.Trajectory().size(); h++){
-
 					std::vector<double> muonVtx = { mcp.Trajectory().at(h).X(),
 													mcp.Trajectory().at(h).Y(), 
 													mcp.Trajectory().at(h).Z() };
 
-					if(_inVol.PointInVolume(muonVtx)){   
+					if(_inVol.PointInVolume(muonVtx))   
 					   muonTraj.push_back(muonVtx) ;
-
-						std::cout<<"\n1Muon things : "<<muonVtx[0]<<std::endl;
-						std::cout<<"2Muon things : "<<muonTraj.at(0).at(0) <<std::endl; 
-					 }
 				 }
 				MuonTraj = muonTraj ;
+*/  //Don't need this
 
-				if(muonTraj.size() >=1 )
-				    muonTracks.push_back(muonTraj);
+
 
 				}//if muon/ antimuon
 	
 				_ana_tree->Fill();
-		//	} //End if statement conditions for which pdgs to save
 		}				
 	
 
@@ -183,7 +177,7 @@ void CosmicsInfo::PrepareTTree() {
 
 	  _ana_tree->Branch("_parentInActiveVolume",&_parentInActiveVolume,"parentInActiveVolume/D");
 
-	  _ana_tree->Branch("MuonTraj",&MuonTraj) ;
+//	  _ana_tree->Branch("MuonTraj",&MuonTraj) ;
 	
 	}
 

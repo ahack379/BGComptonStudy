@@ -95,6 +95,8 @@ namespace larlite {
 	//Muon things
 	std::vector<std::vector<double>> MuonTraj ; 
 
+	int _count0 ;
+
   };
 }
 #endif
