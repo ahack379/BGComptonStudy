@@ -47,7 +47,7 @@ pp = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 
 
 	geoalgo::DistToBoxWall showerObject ;
-	TrajectoryInVolume inVol ;
+	geoalgo::TrajectoryInVolume inVol ;
 	inVol.SetVolume(0,256,-116,116,0,1037) ;
 
 	//   Loop over all mcparticles and look at various processes 
