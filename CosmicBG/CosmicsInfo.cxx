@@ -24,7 +24,7 @@ namespace larlite {
 		  return true;
 		}
 
-	_inVol.SetVolume(0,256.,-116.5,116.5,0,1036.) ;
+	_inVol.SetVolume(0,256.35,-116.5,116.5,0,1036.8) ;
 
 	for(auto const & mcp : * my_mcpart){
 
