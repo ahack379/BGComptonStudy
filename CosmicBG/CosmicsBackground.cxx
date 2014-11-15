@@ -69,8 +69,26 @@ namespace larlite {
 	
 	Reset();
 	
+	_run = my_mcpart->run() ;
+	_subrun = my_mcpart->subrun();
+	_event = my_mcpart->event_id(); 
+	
+	_PDG = part.PdgCode() ;
+	_trackID = part.TrackId() ;
+	_process= part.Process() ;
+	
+	_X = part.Trajectory().at(0).X() ;
+	_Y = part.Trajectory().at(0).Y() ;
+	_Z = part.Trajectory().at(0).Z() ;
+	_T = part.Trajectory().at(0).T() ;
+	
+	_Px = part.Trajectory().at(0).Px() ;
+	_Py = part.Trajectory().at(0).Py() ;
+	_Pz = part.Trajectory().at(0).Pz() ;
+	_E  = part.Trajectory().at(0).E() ;
+
 	//Create mcshower-like things
-	if( part.PdgCode() == 11 && part.Process() == "compt")
+	if( part.PdgCode() == -11 && part.Process() == "compt")
 	  _PDG = 3 ;
 	
 	if( part.PdgCode() == -11 && part.Process() == "conv"){
@@ -88,30 +106,9 @@ namespace larlite {
 	  }
 	}//if positron, conv
 	
-	_run = my_mcpart->run() ;
-	_subrun = my_mcpart->subrun();
-	_event = my_mcpart->event_id(); 
-	
-	_PDG = part.PdgCode() ;
-	_trackID = part.TrackId() ;
-	_process= part.Process() ;
-	
-	_X = part.Trajectory().at(0).X() ;
-	_Y = part.Trajectory().at(0).Y() ;
-	_Z = part.Trajectory().at(0).Z() ;
-	_T = part.Trajectory().at(0).T() ;
-	
-	//over-writing compton info???
-	_Px = part.Trajectory().at(0).Px() ;
-	_Py = part.Trajectory().at(0).Py() ;
-	_Pz = part.Trajectory().at(0).Pz() ;
-	_E  = part.Trajectory().at(0).E() ;
-	
 	std::vector<double> vtx = { _X, _Y, _Z } ;
 	std::vector<double> mom = { _Px, _Py, _Pz } ;
 
-	
-	
 	if(_inVol.PointInVolume(vtx ))
 	  _inActiveVolume = 1 ; 
 	else
@@ -125,7 +122,6 @@ namespace larlite {
 	  _distToIP = distToIP;
 	}
 
-	
 	_distAlongTraj     = _showerObject.DistanceToWall(vtx,mom,1);
 	_distBackAlongTraj = _showerObject.DistanceToWall(vtx,mom,0);
 	
