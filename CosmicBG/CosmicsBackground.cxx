@@ -524,16 +524,25 @@ bool CosmicsBackground::finalize() {
       }// if the muon's track is > 1
       
     }// for all muon tracks
-    
-    distToIP = pow( (IP_onShr.at(0)-shrStart->at(0))*(IP_onShr.at(0)-shrStart->at(0)) +
-		    (IP_onShr.at(1)-shrStart->at(1))*(IP_onShr.at(1)-shrStart->at(1)) +
-		    (IP_onShr.at(2)-shrStart->at(2))*(IP_onShr.at(2)-shrStart->at(2)), 0.5 );
-    
-    muonDist = sqrt(minDist);
-    muonIP = sqrt(minIP);
 
-    //    std::cout << "Smallest distance: " << muonDist << std::endl;
-    
+    if (minDist != 10000){
+      distToIP = pow( (IP_onShr.at(0)-shrStart->at(0))*(IP_onShr.at(0)-shrStart->at(0)) +
+		      (IP_onShr.at(1)-shrStart->at(1))*(IP_onShr.at(1)-shrStart->at(1)) +
+		      (IP_onShr.at(2)-shrStart->at(2))*(IP_onShr.at(2)-shrStart->at(2)), 0.5 );
+      
+      muonDist = sqrt(minDist);
+      muonIP = sqrt(minIP);
+      //need to figure out if IP point is "before" or "after" start point w.r.t. momentum direction
+      if (distToIP > 0.001 ){
+	std::vector<double> vec = { IP_onShr.at(0)-shrStart->at(0),
+				    IP_onShr.at(1)-shrStart->at(1),
+				    IP_onShr.at(2)-shrStart->at(2) };
+	double vecmag = sqrt( (vec.at(0)*vec.at(0)) + (vec.at(1)*vec.at(1)) + (vec.at(2)*vec.at(2)) );
+	double vec_dir = (vec.at(0)*shrDir.at(0) + vec.at(1)*shrDir.at(1) + vec.at(2)*shrDir.at(2))/vecmag;
+	if (vec_dir == 1 ) { distToIP *= -1; }
+      }
+    }
+
     return;
   }
   
