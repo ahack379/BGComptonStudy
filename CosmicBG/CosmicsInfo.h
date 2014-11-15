@@ -18,6 +18,10 @@
 #include "Analysis/ana_base.h"
 #include "DistToBoxWall.h"
 #include "TrajectoryInVolume.h"
+#include "LArUtil/Geometry.h"
+#include "SegmentPoCA.h"
+#include "PointToLineDist.h"
+#include "MCgetter.h"
 #include <vector>
 #include <string>
 
@@ -43,6 +47,12 @@ namespace larlite {
 
     virtual bool finalize();
 
+    void addMuonTrack(mcpart *part);
+
+    void getNearestMuonCutParams( std::vector<double> *shrStart,
+				  std::vector<double> *shrDir);
+      
+
     protected:
 	//ana_tree currently deals with electrons 
 	//from compton scatters
@@ -53,7 +63,7 @@ namespace larlite {
 	int _event ;
 
 	std::string _process ;
-    int _PDG ;
+	int _PDG ;
 	int _trackID ;
 
 	double _X ;
@@ -71,6 +81,10 @@ namespace larlite {
 	double _distAlongTraj ;
 	double _distBackAlongTraj ;
 
+	double _minMuDist;
+	double _minMuIP;
+	double _distToIP;
+
 	//Save info about parent as well
 	int _parentPDG ;
 	double _parentX ;
@@ -85,15 +99,28 @@ namespace larlite {
 
 	bool _parentInActiveVolume ;
 
+
+	// MCgetter stuff
+	MCgetter _MCgetter;
+
 	//Not sure where this goes
 //	int kCompton = 3 ;
 //	int kPairProduction = 4; 
 
 	geoalgo::DistToBoxWall 		 _showerObject;  
 	geoalgo::TrajectoryInVolume	 _inVol ;  
+	/// GeoAlg for PoCA cut
+	geoalgo::SegmentPoCA _PoCA;
+	/// GeoAlg for point to line dist
+	geoalgo::PointToLineDist _pointDist;
 
 	//Muon things
-	std::vector<std::vector<double>> MuonTraj ; 
+	std::vector<std::vector<std::vector<double> > > _allMuonTracksInTPC ; 
+
+	// detector size
+	double detHalfHeight;
+	double detHalfWidth;
+	double detLength;
 
 	int _count0 ;
 

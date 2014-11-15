@@ -14,6 +14,7 @@ OBJECTS = $(SOURCES:.cxx=.o)
 INCFLAGS = -I.                       #Include itself
 INCFLAGS += -I$(LARLITE_COREDIR)
 INCFLAGS += -I$(LARLITE_USERDEVDIR)/BasicTool/GeoAlgo
+INCFLAGS += -I$(LARLITE_USERDEVDIR)/MCPartInfo/MCPartGetter
 
 
 # platform-specific options
