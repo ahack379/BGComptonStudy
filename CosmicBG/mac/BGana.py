@@ -53,6 +53,7 @@ mcgetter = fmwk.MCgetter()
 mcgetter.getAllPDGs(pdgs)
 # Energy cut: If PDG match && E > _ECut [GeV] then add particle
 mcgetter.SetECut(0.01)
+mcgetter.SetVerbose(False)
 
 # Tell module what PDGs to search for
 bg.SetMCgetter(mcgetter)

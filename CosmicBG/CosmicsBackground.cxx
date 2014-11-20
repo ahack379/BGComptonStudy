@@ -88,10 +88,10 @@ namespace larlite {
 	_E  = part.Trajectory().at(0).E() ;
 
 	//Create mcshower-like things
-	if( part.PdgCode() == -11 && part.Process() == "compt")
+	if( part.PdgCode() == 11 && part.Process() == "compt")
 	  _PDG = 3 ;
 	
-	if( part.PdgCode() == -11 && part.Process() == "conv"){
+	if( part.PdgCode() == 11 && part.Process() == "conv"){
 	  _PDG = 4 ;
 	  
 	  if (_MCgetter.searchParticleMap(result.at(j).getParentId()) >= 0){
@@ -122,6 +122,7 @@ namespace larlite {
 	  _distToIP = distToIP;
 	}
 
+	_distToWall 	   = _showerObject.DistanceToWall(vtx) ;
 	_distAlongTraj     = _showerObject.DistanceToWall(vtx,mom,1);
 	_distBackAlongTraj = _showerObject.DistanceToWall(vtx,mom,0);
 	
@@ -267,6 +268,7 @@ namespace larlite {
 
 	  _ana_tree->Branch("_inActiveVolume",&_inActiveVolume,"inActiveVolume/I");
 	  
+	  _ana_tree->Branch("_distToWall",&_distToWall,"distToWall/D");
 	  _ana_tree->Branch("_distAlongTraj",&_distAlongTraj,"distAlongTraj/D") ;
 	  _ana_tree->Branch("_distBackAlongTraj",&_distBackAlongTraj,"distBackAlongTraj/D") ;
 
