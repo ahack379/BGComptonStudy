@@ -219,9 +219,9 @@ namespace larlite {
 	      std::vector<double> PoCAPointMU = {-1000,-1000,-1000};
 	      std::vector<double> PoCAPointE = {-1000,-1000,-1000};
 	      
-	      _ancDist = sqrt(_pointDist.DistanceToTrack(&vtx,&ancTraj));
+	      _ancDist = sqrt(_pointDist.DistanceToTrack(vtx,ancTraj));
 	      //	      if (_inActiveVolume) { std::cout << "Distance to ancestor: " << _ancDist << std::endl << std::endl; }
-	      _ancIP = sqrt(_PoCA.ClosestApproachToTrajectory(&ancTraj,&shrOrigin,&shrEnd,c1,c2));
+	      _ancIP = sqrt(_PoCA.ClosestApproachToTrajectory(ancTraj,shrOrigin,shrEnd,c1,c2));
 	      _ancToIP = sqrt ( (c2.at(0)-vtx.at(0))*(c2.at(0)-vtx.at(0)) +
 				(c2.at(1)-vtx.at(1))*(c2.at(1)-vtx.at(1)) +
 				(c2.at(2)-vtx.at(2))*(c2.at(2)-vtx.at(2)) );
@@ -512,10 +512,10 @@ bool CosmicsBackground::finalize() {
       if ( (_allMuonTracksInTPC.at(u).size() > 1) and (_allMuonTracksIDs.at(u) != ancestorTrackID) ){
 
 	// distance to muon track
-	double tmpDist = _pointDist.DistanceToTrack(shrStart, &(_allMuonTracksInTPC.at(u)));
+	double tmpDist = _pointDist.DistanceToTrack(*shrStart, (_allMuonTracksInTPC.at(u)));
 	//	std::cout << "Muon points: " << _allMuonTracksInTPC.at(u).size() << "\tDistance to this muon: " << sqrt(tmpDist) << std::endl;
 	// Impact parameter
-	double tmpIP = _PoCA.ClosestApproachToTrajectory(&(_allMuonTracksInTPC.at(u)), &shrOrigin, &shrEnd, c1, c2);
+	double tmpIP = _PoCA.ClosestApproachToTrajectory((_allMuonTracksInTPC.at(u)), shrOrigin, shrEnd, c1, c2);
 
 	if (tmpDist < minDist) { minDist = tmpDist; }
 	if (tmpIP < minIP) { 

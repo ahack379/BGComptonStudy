@@ -312,9 +312,9 @@ bool CosmicsInfo::finalize() {
     
     if (_allMuonTracksInTPC.at(u).size() > 1){
       // distance to muon track
-      double tmpDist = _pointDist.DistanceToTrack(shrStart, &(_allMuonTracksInTPC.at(u)));
+      double tmpDist = _pointDist.DistanceToTrack(*shrStart, (_allMuonTracksInTPC.at(u)));
       // Impact parameter
-      double tmpIP = _PoCA.ClosestApproachToTrajectory(&(_allMuonTracksInTPC.at(u)), &shrOrigin, &shrEnd, c1, c2);
+      double tmpIP = _PoCA.ClosestApproachToTrajectory((_allMuonTracksInTPC.at(u)), shrOrigin, shrEnd, c1, c2);
       
       if (tmpDist < minDist) { minDist = tmpDist; }
       if (tmpIP < minIP) { 
