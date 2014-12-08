@@ -16,16 +16,17 @@
 #define LARLITE_BGSHOWERINFO_H
 
 #include "Analysis/ana_base.h"
-#include "DistToBoxWall.h"
-#include "TrajectoryInVolume.h"
+#include "DistanceAlgo.h"
+#include "LArUtil/Geometry.h"
+#include "IntersectAlgo.h"
 #include <vector>
 #include <string>
 
 namespace larlite {
 
-  class BGShowerInfo : public ana_base{
-  
-  public:
+    class BGShowerInfo : public ana_base{
+
+    public:
 
     BGShowerInfo(){ _name="BGShowerInfo"; _fout=0;};
 
@@ -44,6 +45,15 @@ namespace larlite {
     virtual bool finalize();
 
     protected:
+
+        // GeoAlgo for Distance Algos
+        geoalgo::DistanceAlgo _dAlgo;
+	// geoalgo for Intersection Algos
+	geoalgo::IntersectAlgo _iAlgo;
+	
+	// TPC AABox object
+	geoalgo::AABox _TpcBox;
+
 	//ana_tree currently deals with electrons 
 	//from compton scatters
 	TTree * _ana_tree ;

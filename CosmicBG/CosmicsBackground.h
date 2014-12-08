@@ -15,12 +15,10 @@
 #ifndef LARLITE_COSMICSBACKGROUND_H
 #define LARLITE_COSMICSBACKGROUND_H
 
+#include "DistanceAlgo.h"
+#include "IntersectAlgo.h"
 #include "Analysis/ana_base.h"
-#include "DistToBoxWall.h"
-#include "TrajectoryInVolume.h"
 #include "LArUtil/Geometry.h"
-#include "SegmentPoCA.h"
-#include "PointToLineDist.h"
 #include "MCgetter.h"
 #include <vector>
 #include <string>
@@ -47,23 +45,23 @@ namespace larlite {
 
     virtual bool finalize();
 
-    void addMuonTrack(mcpart *part);
+    void addMuonTrack(const mcpart& part);
 
-    std::vector<std::vector<double> > getMuonTrack(mcpart *part);
+    geoalgo::Trajectory_t getMuonTrack(const mcpart& part);
 
     void setECut(double e) { _Ecut = e; }
 
-    double getLen(std::vector<std::vector<double> > *muonTrack);
+    double getLen(geoalgo::Trajectory_t& muonTrack);
 
     /// Set MCgetter object
     void SetMCgetter(MCgetter mcgetter) { _MCgetter = mcgetter; }
 
-    void getNearestMuonCutParams( std::vector<double> *shrStart,
-				  std::vector<double> *shrMom,
-				  double &muonDist,
-				  double &muonIP,
-				  double &distToIP,
-				  int ancestorTrackID);
+    void getNearestMuonCutParams(const geoalgo::Point_t& shrStart,
+				 const geoalgo::Vector_t& shrMom,
+				 double &muonDist,
+				 double &muonIP,
+				 double &distToIP,
+				 int ancestorTrackID);
       
 
     protected:
@@ -143,15 +141,18 @@ namespace larlite {
 //	int kCompton = 3 ;
 //	int kPairProduction = 4; 
 
-	geoalgo::DistToBoxWall 		 _showerObject;  
-	geoalgo::TrajectoryInVolume	 _inVol ;  
-	/// GeoAlg for PoCA cut
-	geoalgo::SegmentPoCA _PoCA;
-	/// GeoAlg for point to line dist
-	geoalgo::PointToLineDist _pointDist;
+
+
+	// GeoAlgo for Distance Algos
+	geoalgo::DistanceAlgo _dAlgo;
+	// geoalgo for Intersection Algos
+	geoalgo::IntersectAlgo _iAlgo;
+	
+	// TPC AABox object
+	geoalgo::AABox _TpcBox;
 
 	//Muon things
-	std::vector<std::vector<std::vector<double> > > _allMuonTracksInTPC ; 
+	std::vector<geoalgo::Trajectory_t> _allMuonTracksInTPC; 
 	// all tracks except ancestor
 	std::vector<int> _allMuonTracksIDs ;
 

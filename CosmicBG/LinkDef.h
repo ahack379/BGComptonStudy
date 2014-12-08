@@ -10,7 +10,6 @@
 #pragma link off all functions;
 
 #pragma link C++ class larlite::BGShowerInfo+;
-#pragma link C++ class larlite::CosmicsInfo+;
 #pragma link C++ class larlite::CosmicsBackground+;
 //ADD_NEW_CLASS ... do not change this line
 

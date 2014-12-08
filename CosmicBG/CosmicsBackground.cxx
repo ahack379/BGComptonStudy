@@ -16,6 +16,10 @@ namespace larlite {
     detHalfHeight = ::larutil::Geometry::GetME()->DetHalfHeight();
     detLength = ::larutil::Geometry::GetME()->DetLength();
 
+    /// Set TPC Boundaries
+    _TpcBox = geoalgo::AABox(0, -detHalfHeight, 0,
+			     2*detHalfWidth, detHalfHeight, detLength);
+
     _hAllMuonTrackLen = new TH1D("hAllMuonTrackLen","Sum Length of All Muon Tracks in TPC",100,0,40);
 
    return true;
@@ -36,30 +40,27 @@ namespace larlite {
     std::vector<TreeNode> muon = _MCgetter.getTreeNodelist().at(1);
     std::vector<TreeNode> antimuon = _MCgetter.getTreeNodelist().at(2);
 
-
+    std::cout << "Muons: " << muon.size() << std::endl;
     // first get all mu+/mu-
     _allMuonTracksInTPC.clear();
     _allMuonTracksIDs.clear();
     for (size_t y=0; y < muon.size(); y++){
       mcpart mu = my_mcpart->at(_MCgetter.searchParticleMap(muon.at(y).getNodeIndex()));
-      addMuonTrack(&mu);
+      addMuonTrack(mu);
     }//for all mu-
     for (size_t k=0; k < antimuon.size(); k++){
       mcpart antimu = my_mcpart->at(_MCgetter.searchParticleMap(antimuon.at(k).getNodeIndex()));
-      addMuonTrack(&antimu);
+      addMuonTrack(antimu);
     }//for all mu+
 
     // get sum length of all muon tracks
     double totLen = 0;
     for (size_t t=0; t < _allMuonTracksInTPC.size(); t++)
-      totLen += getLen(&_allMuonTracksInTPC.at(t));
+      totLen += getLen(_allMuonTracksInTPC.at(t));
 
     _hAllMuonTrackLen->Fill(totLen/100.);
     std::cout << "Sum Muon Track Length in meters: " << totLen/100. << std::endl;
     
-    _inVol.SetVolume(0,256.35,-116.5,116.5,0,1036.8) ;
-    
-
     for (size_t j=0; j < result.size(); j++){
     
       mcpart part = my_mcpart->at(_MCgetter.searchParticleMap( result.at(j).getNodeIndex() ));
@@ -106,25 +107,26 @@ namespace larlite {
 	  }
 	}//if positron, conv
 	
-	std::vector<double> vtx = { _X, _Y, _Z } ;
-	std::vector<double> mom = { _Px, _Py, _Pz } ;
+	geoalgo::Point_t vtx(_X, _Y, _Z);
+	geoalgo::Vector_t mom(_Px, _Py, _Pz);
 
-	if(_inVol.PointInVolume(vtx ))
+	if(_TpcBox.Contain(vtx))
 	  _inActiveVolume = 1 ; 
 	else
 	  _inActiveVolume = 0 ;
 
 	if (_inActiveVolume){
 	  double muonDist, muonIP, distToIP;
-	  getNearestMuonCutParams( &vtx, &mom, muonDist, muonIP, distToIP, 0);
+	  getNearestMuonCutParams(vtx, mom, muonDist, muonIP, distToIP, 0);
 	  _minMuDist = muonDist;
 	  _minMuIP = muonIP;
 	  _distToIP = distToIP;
-	}
 
-	_distAlongTraj     = _showerObject.DistanceToWall(vtx,mom,1);
-	_distBackAlongTraj = _showerObject.DistanceToWall(vtx,mom,0);
-	
+	  geoalgo::HalfLine_t sDir(vtx,mom);
+	  
+	  _distAlongTraj = vtx.Dist(_iAlgo.Intersection(_TpcBox,sDir));
+	  _distBackAlongTraj = vtx.SqDist(_iAlgo.Intersection(_TpcBox,sDir,true));
+	}	
 	
 	// get parent information
 	if (_MCgetter.searchParticleMap(result.at(j).getParentId()) >= 0){
@@ -142,10 +144,10 @@ namespace larlite {
 	  _parentPz = mother.Trajectory().at(0).Pz();
 	  _parentE  = mother.Trajectory().at(0).E();
 	  
-	  std::vector<double> pVtx = { _parentX, _parentY, _parentZ } ; 
-	  std::vector<double> pMom = { _parentPx, _parentPy, _parentPz } ;
+	  geoalgo::Point_t pVtx(_parentX, _parentY, _parentZ); 
+	  geoalgo::Vector_t pMom(_parentPx, _parentPy, _parentPz);
 	  
-	  if(_inVol.PointInVolume(pVtx))
+	  if(_TpcBox.Contain(pVtx))
 	    _parentInActiveVolume = 1; 
 	  else
 	    _parentInActiveVolume = 0;
@@ -159,7 +161,7 @@ namespace larlite {
 
 	  if (_inActiveVolume){
 	    double muonDistExceptAncestor, muonIPExceptAncestor, distToIPExceptAncestor;
-	    getNearestMuonCutParams( &vtx, &mom, muonDistExceptAncestor, muonIPExceptAncestor,
+	    getNearestMuonCutParams(vtx, mom, muonDistExceptAncestor, muonIPExceptAncestor,
 				     distToIPExceptAncestor, result.at(j).getAncestorId());
 	    _minMuDistExceptAncestor = muonDistExceptAncestor;
 	    _minMuIPExceptAncestor = muonIPExceptAncestor;
@@ -177,17 +179,17 @@ namespace larlite {
 	  _ancestorPy = ancestor.Trajectory().at(0).Py();
 	  _ancestorPz = ancestor.Trajectory().at(0).Pz();
 	  _ancestorE  = ancestor.Trajectory().at(0).E();
+
+	  geoalgo::Point_t aVtx(_ancestorX, _ancestorY, _ancestorZ);
+	  geoalgo::Vector_t aMom(_ancestorPx, _parentPy, _ancestorPz);
 	  
-	  std::vector<double> aVtx = { _ancestorX, _ancestorY, _ancestorZ } ; 
-	  std::vector<double> aMom = { _ancestorPx, _parentPy, _ancestorPz } ;
-	  
-	  if(_inVol.PointInVolume(aVtx))
+	  if(_TpcBox.Contain(aVtx))
 	    _ancestorInActiveVolume = 1;  
 	  else
 	    _ancestorInActiveVolume = 0;
 
 	  // get full ancestor trajectory
-	  std::vector<std::vector<double> > ancTraj = getMuonTrack(&ancestor);
+	  geoalgo::Trajectory_t ancTraj = getMuonTrack(ancestor);
 
 	  if (ancTraj.size() > 1){
 	    
@@ -202,25 +204,22 @@ namespace larlite {
 	      // which starts 3 meters before start point
 	      // and ends 10 cm after start point
 	      // aligned with shr momentum. Use for Impact Parameter
-	      std::vector<double> shrOrigin = { vtx.at(0)-300*shrDir.at(0),
-						vtx.at(1)-300*shrDir.at(1),
-						vtx.at(2)-300*shrDir.at(2) };
+	      geoalgo::Point_t shrOrigin(vtx.at(0)-300*shrDir.at(0),
+					 vtx.at(1)-300*shrDir.at(1),
+					 vtx.at(2)-300*shrDir.at(2));
 	      
-	      std::vector<double> shrEnd = { vtx.at(0)+10*shrDir.at(0),
-					     vtx.at(1)+10*shrDir.at(1),
-					     vtx.at(2)+10*shrDir.at(2) };
+	      geoalgo::Point_t shrEnd(vtx.at(0)+10*shrDir.at(0),
+				      vtx.at(1)+10*shrDir.at(1),
+				      vtx.at(2)+10*shrDir.at(2));
 	      
-	      
+	      geoalgo::LineSegment_t shrSeg(shrOrigin,shrEnd);
 	      
 	      //used for PoCA
-	      std::vector<double> c1 = {-1000,-1000,-1000};
-	      std::vector<double> c2 = {-1000,-1000,-1000};
-	      std::vector<double> PoCAPointMU = {-1000,-1000,-1000};
-	      std::vector<double> PoCAPointE = {-1000,-1000,-1000};
+	      geoalgo::Point_t c1(3);
+	      geoalgo::Point_t c2(3);
 	      
-	      _ancDist = sqrt(_pointDist.DistanceToTrack(&vtx,&ancTraj));
-	      //	      if (_inActiveVolume) { std::cout << "Distance to ancestor: " << _ancDist << std::endl << std::endl; }
-	      _ancIP = sqrt(_PoCA.ClosestApproachToTrajectory(&ancTraj,&shrOrigin,&shrEnd,c1,c2));
+	      _ancDist = _dAlgo.SqDist(vtx,ancTraj);
+	      _ancIP = _dAlgo.SqDist(ancTraj,shrSeg,c1,c2);
 	      _ancToIP = sqrt ( (c2.at(0)-vtx.at(0))*(c2.at(0)-vtx.at(0)) +
 				(c2.at(1)-vtx.at(1))*(c2.at(1)-vtx.at(1)) +
 				(c2.at(2)-vtx.at(2))*(c2.at(2)-vtx.at(2)) );
@@ -322,10 +321,10 @@ namespace larlite {
 
  }
 
-  void CosmicsBackground::addMuonTrack(mcpart *part){
+  void CosmicsBackground::addMuonTrack(const mcpart& part){
 
-    mctrajectory traj = part->Trajectory();
-    std::vector<std::vector<double> > thistrack;
+    mctrajectory traj = part.Trajectory();
+    geoalgo::Trajectory_t thistrack(0,3);
 
     for (size_t i=0; i < traj.size(); i++){
 
@@ -333,13 +332,13 @@ namespace larlite {
       if ( (traj.at(i).X() > 0) and (traj.at(i).X() < 2*detHalfWidth) and
 	   (traj.at(i).Y() > -detHalfHeight) and (traj.at(i).Y() < detHalfHeight) and
 	   (traj.at(i).Z() > 0) and (traj.at(i).Z() < detLength) )
-	   thistrack.push_back( {traj.at(i).X(), traj.at(i).Y(), traj.at(i).Z()} );
+	thistrack.push_back( geoalgo::Point_t(traj.at(i).X(), traj.at(i).Y(), traj.at(i).Z()) );
 				     
     }//for all points
 
     if (thistrack.size() > 0){
       _allMuonTracksInTPC.push_back(thistrack);
-      _allMuonTracksIDs.push_back(part->TrackId());
+      _allMuonTracksIDs.push_back(part.TrackId());
     }
 
     return;
@@ -347,10 +346,10 @@ namespace larlite {
 
 
 
-  std::vector<std::vector<double> > CosmicsBackground::getMuonTrack(mcpart *part){
+  geoalgo::Trajectory_t CosmicsBackground::getMuonTrack(const mcpart& part){
 
-    mctrajectory traj = part->Trajectory();
-    std::vector<std::vector<double> > thistrack;
+    mctrajectory traj = part.Trajectory();
+    geoalgo::Trajectory_t thistrack(0,3);
 
     for (size_t i=0; i < traj.size(); i++){
 
@@ -358,7 +357,7 @@ namespace larlite {
       if ( (traj.at(i).X() > 0) and (traj.at(i).X() < 2*detHalfWidth) and
 	   (traj.at(i).Y() > -detHalfHeight) and (traj.at(i).Y() < detHalfHeight) and
 	   (traj.at(i).Z() > 0) and (traj.at(i).Z() < detLength) )
-	   thistrack.push_back( {traj.at(i).X(), traj.at(i).Y(), traj.at(i).Z()} );
+	thistrack.push_back( geoalgo::Point_t(traj.at(i).X(), traj.at(i).Y(), traj.at(i).Z()) );
 				     
     }//for all points
     
@@ -457,20 +456,14 @@ bool CosmicsBackground::finalize() {
   }
 
 
-  double CosmicsBackground::getLen(std::vector<std::vector<double> > *muonTrack){
+  double CosmicsBackground::getLen(geoalgo::Trajectory_t& muonTrack){
     
-    double len=0;
-    for (size_t i=0; i < (muonTrack->size()-1); i++)
-      len += sqrt( (muonTrack->at(i).at(0)-muonTrack->at(i+1).at(0))*(muonTrack->at(i).at(0)-muonTrack->at(i+1).at(0)) +
-		   (muonTrack->at(i).at(1)-muonTrack->at(i+1).at(1))*(muonTrack->at(i).at(1)-muonTrack->at(i+1).at(1)) +
-		   (muonTrack->at(i).at(2)-muonTrack->at(i+1).at(2))*(muonTrack->at(i).at(2)-muonTrack->at(i+1).at(2)) );
-      
-    return len;
+    return muonTrack.Length();
   }
 
 
-  void CosmicsBackground::getNearestMuonCutParams( std::vector<double> *shrStart,
-						   std::vector<double> *shrMom,
+  void CosmicsBackground::getNearestMuonCutParams( const geoalgo::Point_t& shrStart,
+						   const geoalgo::Vector_t& shrMom,
 						   double &muonDist,
 						   double &muonIP,
 						   double &distToIP, int ancestorTrackID){
@@ -481,40 +474,30 @@ bool CosmicsBackground::finalize() {
 
     // initialize values for PoCA cut
     double minIP = 10000;
-    std::vector<double> IP_onShr = {-1000, -1000, -1000};
-    std::vector<double> c1 = {-1000,-1000,-1000};
-    std::vector<double> c2 = {-1000,-1000,-1000};
-    std::vector<double> PoCAPointMU = {-1000,-1000,-1000};
-    std::vector<double> PoCAPointE = {-1000,-1000,-1000};
+    geoalgo::Point_t IP_onShr(3);
+    geoalgo::Point_t c1(3);
+    geoalgo::Point_t c2(3);
     // initialize values for muon proximity
     double minDist = 10000;
 
-    double shrP = sqrt( shrMom->at(0)*shrMom->at(0) + shrMom->at(1)*shrMom->at(1) + shrMom->at(2)*shrMom->at(2) );
-    std::vector<double> shrDir = { shrMom->at(0)/shrP, shrMom->at(1)/shrP, shrMom->at(2)/shrP };
+    geoalgo::Vector_t shrP = shrMom/shrMom.Length();
     
     // use shower start & momentum to define a segment
     // which starts 3 meters before start point
     // and ends 10 cm after start point
     // aligned with shr momentum. Use for Impact Parameter
-    std::vector<double> shrOrigin = { shrStart->at(0)-300*shrDir.at(0),
-				      shrStart->at(1)-300*shrDir.at(1),
-				      shrStart->at(2)-300*shrDir.at(2) };
+    geoalgo::LineSegment_t shrSeg(shrStart-shrP*300,shrStart+shrP*10);
     
-    std::vector<double> shrEnd = { shrStart->at(0)+10*shrDir.at(0),
-				   shrStart->at(1)+10*shrDir.at(1),
-				   shrStart->at(2)+10*shrDir.at(2) };
-
-
     // loop over all muon tracks and calculate value per-muon
     for (size_t u=0; u < _allMuonTracksInTPC.size(); u++){
+
       if ( (_allMuonTracksInTPC.at(u).size() > 1) and (_allMuonTracksIDs.at(u) != ancestorTrackID) ){
-
+	
 	// distance to muon track
-	double tmpDist = _pointDist.DistanceToTrack(shrStart, &(_allMuonTracksInTPC.at(u)));
-	//	std::cout << "Muon points: " << _allMuonTracksInTPC.at(u).size() << "\tDistance to this muon: " << sqrt(tmpDist) << std::endl;
+	double tmpDist = _dAlgo.SqDist(shrStart,_allMuonTracksInTPC.at(u));
 	// Impact parameter
-	double tmpIP = _PoCA.ClosestApproachToTrajectory(&(_allMuonTracksInTPC.at(u)), &shrOrigin, &shrEnd, c1, c2);
-
+	double tmpIP = _dAlgo.SqDist(_allMuonTracksInTPC.at(u),shrSeg,c1,c2);
+	
 	if (tmpDist < minDist) { minDist = tmpDist; }
 	if (tmpIP < minIP) { 
 	  minIP = tmpIP; 
@@ -526,20 +509,13 @@ bool CosmicsBackground::finalize() {
     }// for all muon tracks
 
     if (minDist != 10000){
-      distToIP = pow( (IP_onShr.at(0)-shrStart->at(0))*(IP_onShr.at(0)-shrStart->at(0)) +
-		      (IP_onShr.at(1)-shrStart->at(1))*(IP_onShr.at(1)-shrStart->at(1)) +
-		      (IP_onShr.at(2)-shrStart->at(2))*(IP_onShr.at(2)-shrStart->at(2)), 0.5 );
-      
+      distToIP = IP_onShr.Dist(shrStart);
       muonDist = sqrt(minDist);
       muonIP = sqrt(minIP);
       //need to figure out if IP point is "before" or "after" start point w.r.t. momentum direction
       if (distToIP > 0.001 ){
-	std::vector<double> vec = { IP_onShr.at(0)-shrStart->at(0),
-				    IP_onShr.at(1)-shrStart->at(1),
-				    IP_onShr.at(2)-shrStart->at(2) };
-	double vecmag = sqrt( (vec.at(0)*vec.at(0)) + (vec.at(1)*vec.at(1)) + (vec.at(2)*vec.at(2)) );
-	double vec_dir = (vec.at(0)*shrDir.at(0) + vec.at(1)*shrDir.at(1) + vec.at(2)*shrDir.at(2))/vecmag;
-	if (vec_dir == 1 ) { distToIP *= -1; }
+	double dot = ( (IP_onShr-shrStart)/((IP_onShr-shrStart).Length() ))*shrP;
+	if (dot == 1 ) { distToIP *= -1; }
       }
     }
 

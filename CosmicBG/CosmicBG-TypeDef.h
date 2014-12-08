@@ -7,7 +7,6 @@
 
 // Header files included here
 #include "BGShowerInfo.h"
-#include "CosmicsInfo.h"
 #include "CosmicsBackground.h"
 //ADD_NEW_HEADER ... do not change this comment line
 
@@ -15,7 +14,6 @@
 namespace larlite {
 
   class BGShowerInfo;
-  class CosmicsInfo;
   class CosmicsBackground;
 //ADD_ANA_CLASS ... do not change this comment line
 

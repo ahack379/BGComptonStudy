@@ -45,10 +45,13 @@ pp = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 		  return true;
 		}
 
-
-	geoalgo::DistToBoxWall showerObject ;
-	geoalgo::TrajectoryInVolume inVol ;
-	inVol.SetVolume(0,256,-116,116,0,1037) ;
+	double detHalfWidth = ::larutil::Geometry::GetME()->DetHalfWidth();
+	double detHalfHeight = ::larutil::Geometry::GetME()->DetHalfHeight();
+	double detLength = ::larutil::Geometry::GetME()->DetLength();
+	
+	/// Set TPC Boundaries
+	_TpcBox = geoalgo::AABox(0, -detHalfHeight, 0,
+				 2*detHalfWidth, detHalfHeight, detLength);
 
 	//   Loop over all mcparticles and look at various processes 
 	//1) Compton electron with vtx in TPC
@@ -85,7 +88,7 @@ pp = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 
 			_elecVtx = { mcp.Trajectory().at(0).X(), mcp.Trajectory().at(0).Y(), mcp.Trajectory().at(0).Z() };
 
-			if ( inVol.PointInVolume(_elecVtx) ){
+			if ( _TpcBox.Contain(geoalgo::Vector(_elecVtx)) ){
 				int	MotherOfComp =  mcp.Mother() ;
 
 				for(auto const& mcp2 : * my_mcpart){
@@ -95,7 +98,7 @@ pp = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 						std::vector<double> temp_gamma_vtx(3,0) ; 
 						temp_gamma_vtx = { mcp2.Trajectory().at(0).X(), mcp2.Trajectory().at(0).Y(),  mcp2.Trajectory().at(0).Z() };
 
-						if(!inVol.PointInVolume(temp_gamma_vtx)) {
+						if(!_TpcBox.Contain(geoalgo::Vector(temp_gamma_vtx))) {
 							_gammaCompX = temp_gamma_vtx[0]; 
 							_gammaCompY = temp_gamma_vtx[1]; 
 							_gammaCompZ = temp_gamma_vtx[2]; 
@@ -112,10 +115,12 @@ pp = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 							_inVolElecX = _elecVtx[0];
 							_inVolElecY = _elecVtx[1];
 							_inVolElecZ = _elecVtx[2];
-			
-							_dist_ToWall        = showerObject.DistanceToWall(_elecVtx) ;
-							_dist_AlongTraj     = showerObject.DistanceToWall(_elecVtx,_elecMom,1);
-							_dist_BackAlongTraj = showerObject.DistanceToWall(_elecVtx,_elecMom,0);
+		
+							geoalgo::Point_t eVtx(_elecVtx); 
+							geoalgo::HalfLine_t sDir(_elecVtx,_elecMom);
+							_dist_ToWall = _dAlgo.SqDist(eVtx,_TpcBox);
+							_dist_AlongTraj = eVtx.Dist(_iAlgo.Intersection(_TpcBox,sDir));
+							_dist_BackAlongTraj = eVtx.Dist(_iAlgo.Intersection(_TpcBox,sDir,true));
 
 							if(_ana_tree)	
 								_ana_tree->Fill();
@@ -184,7 +189,7 @@ pp = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 
 			  _positronVtx = { mcp.Trajectory().at(0).X(), mcp.Trajectory().at(0).Y(), mcp.Trajectory().at(0).Z() };
 
-			  if ( inVol.PointInVolume(_positronVtx) ){
+			  if ( _TpcBox.Contain(geoalgo::Vector(_positronVtx)) ){
 				int	MotherID =  mcp.Mother() ;
 
 				for(auto const& mcp2 : * my_mcpart){
@@ -193,7 +198,7 @@ pp = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 						std::vector<double> temp_gamma_vtx(3,0) ; 
 						temp_gamma_vtx = { mcp2.Trajectory().at(0).X(), mcp2.Trajectory().at(0).Y(),  mcp2.Trajectory().at(0).Z() };
 
-						if(!inVol.PointInVolume(temp_gamma_vtx)) {
+						if(!_TpcBox.Contain(geoalgo::Vector(temp_gamma_vtx))) {
 							_energyGammaBegin = mcp2.Trajectory().at(0).E() ;
 							_energyGammaEnd = mcp2.Trajectory().at(mcp2.Trajectory().size()-2).E() ;
 							_inVolPosX = _positronVtx[0];
@@ -205,7 +210,9 @@ pp = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 							_pzPP = mcp2.Trajectory().at(mcp2.Trajectory().size()-2).Pz() ;
 		
 							_ppMom = {_pxPP, _pyPP, _pzPP };
-							_dist_BackAlongTrajPP = showerObject.DistanceToWall(_positronVtx,_ppMom,0);
+							geoalgo::Point_t ppStart(_positronVtx);
+							geoalgo::HalfLine_t ppDir(_positronVtx,_ppMom);
+							_dist_BackAlongTrajPP = ppStart.Dist(_iAlgo.Intersection(_TpcBox,ppDir,true));
 
 							if(_pp_tree)
 								_pp_tree->Fill();
