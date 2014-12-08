@@ -89,10 +89,10 @@ namespace larlite {
 	_E  = part.Trajectory().at(0).E() ;
 
 	//Create mcshower-like things
-	if( part.PdgCode() == -11 && part.Process() == "compt")
+	if( part.PdgCode() == 11 && part.Process() == "compt")
 	  _PDG = 3 ;
 	
-	if( part.PdgCode() == -11 && part.Process() == "conv"){
+	if( part.PdgCode() == 11 && part.Process() == "conv"){
 	  _PDG = 4 ;
 	  
 	  if (_MCgetter.searchParticleMap(result.at(j).getParentId()) >= 0){
@@ -122,11 +122,18 @@ namespace larlite {
 	  _minMuIP = muonIP;
 	  _distToIP = distToIP;
 
+<<<<<<< HEAD
 	  geoalgo::HalfLine_t sDir(vtx,mom);
 	  
 	  _distAlongTraj = vtx.Dist(_iAlgo.Intersection(_TpcBox,sDir));
 	  _distBackAlongTraj = vtx.SqDist(_iAlgo.Intersection(_TpcBox,sDir,true));
 	}	
+=======
+	_distToWall 	   = _showerObject.DistanceToWall(vtx) ;
+	_distAlongTraj     = _showerObject.DistanceToWall(vtx,mom,1);
+	_distBackAlongTraj = _showerObject.DistanceToWall(vtx,mom,0);
+	
+>>>>>>> 7118963e580b9b59e672fd3eea9219e62c62487c
 	
 	// get parent information
 	if (_MCgetter.searchParticleMap(result.at(j).getParentId()) >= 0){
@@ -218,8 +225,14 @@ namespace larlite {
 	      geoalgo::Point_t c1(3);
 	      geoalgo::Point_t c2(3);
 	      
+<<<<<<< HEAD
 	      _ancDist = _dAlgo.SqDist(vtx,ancTraj);
 	      _ancIP = _dAlgo.SqDist(ancTraj,shrSeg,c1,c2);
+=======
+	      _ancDist = sqrt(_pointDist.DistanceToTrack(vtx,ancTraj));
+	      //	      if (_inActiveVolume) { std::cout << "Distance to ancestor: " << _ancDist << std::endl << std::endl; }
+	      _ancIP = sqrt(_PoCA.ClosestApproachToTrajectory(ancTraj,shrOrigin,shrEnd,c1,c2));
+>>>>>>> 7118963e580b9b59e672fd3eea9219e62c62487c
 	      _ancToIP = sqrt ( (c2.at(0)-vtx.at(0))*(c2.at(0)-vtx.at(0)) +
 				(c2.at(1)-vtx.at(1))*(c2.at(1)-vtx.at(1)) +
 				(c2.at(2)-vtx.at(2))*(c2.at(2)-vtx.at(2)) );
@@ -266,6 +279,7 @@ namespace larlite {
 
 	  _ana_tree->Branch("_inActiveVolume",&_inActiveVolume,"inActiveVolume/I");
 	  
+	  _ana_tree->Branch("_distToWall",&_distToWall,"distToWall/D");
 	  _ana_tree->Branch("_distAlongTraj",&_distAlongTraj,"distAlongTraj/D") ;
 	  _ana_tree->Branch("_distBackAlongTraj",&_distBackAlongTraj,"distBackAlongTraj/D") ;
 
@@ -494,10 +508,18 @@ bool CosmicsBackground::finalize() {
       if ( (_allMuonTracksInTPC.at(u).size() > 1) and (_allMuonTracksIDs.at(u) != ancestorTrackID) ){
 	
 	// distance to muon track
+<<<<<<< HEAD
 	double tmpDist = _dAlgo.SqDist(shrStart,_allMuonTracksInTPC.at(u));
 	// Impact parameter
 	double tmpIP = _dAlgo.SqDist(_allMuonTracksInTPC.at(u),shrSeg,c1,c2);
 	
+=======
+	double tmpDist = _pointDist.DistanceToTrack(*shrStart, (_allMuonTracksInTPC.at(u)));
+	//	std::cout << "Muon points: " << _allMuonTracksInTPC.at(u).size() << "\tDistance to this muon: " << sqrt(tmpDist) << std::endl;
+	// Impact parameter
+	double tmpIP = _PoCA.ClosestApproachToTrajectory((_allMuonTracksInTPC.at(u)), shrOrigin, shrEnd, c1, c2);
+
+>>>>>>> 7118963e580b9b59e672fd3eea9219e62c62487c
 	if (tmpDist < minDist) { minDist = tmpDist; }
 	if (tmpIP < minIP) { 
 	  minIP = tmpIP; 

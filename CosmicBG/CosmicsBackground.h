@@ -89,6 +89,7 @@ namespace larlite {
 
 	int _inActiveVolume ;
 
+	double _distToWall ;
 	double _distAlongTraj ;
 	double _distBackAlongTraj ;
 
