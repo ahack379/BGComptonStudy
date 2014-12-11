@@ -118,9 +118,9 @@ pp = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 		
 							geoalgo::Point_t eVtx(_elecVtx); 
 							geoalgo::HalfLine_t sDir(_elecVtx,_elecMom);
-							_dist_ToWall = _dAlgo.SqDist(eVtx,_TpcBox);
-							_dist_AlongTraj = eVtx.Dist(_iAlgo.Intersection(_TpcBox,sDir));
-							_dist_BackAlongTraj = eVtx.Dist(_iAlgo.Intersection(_TpcBox,sDir,true));
+							_dist_ToWall = sqrt(_geoAlgo.SqDist(eVtx,_TpcBox));
+							_dist_AlongTraj = eVtx.Dist(_geoAlgo.Intersection(_TpcBox,sDir)[0]);
+							_dist_BackAlongTraj = eVtx.Dist(_geoAlgo.Intersection(_TpcBox,sDir,true)[0]);
 
 							if(_ana_tree)	
 								_ana_tree->Fill();
@@ -212,7 +212,7 @@ pp = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 							_ppMom = {_pxPP, _pyPP, _pzPP };
 							geoalgo::Point_t ppStart(_positronVtx);
 							geoalgo::HalfLine_t ppDir(_positronVtx,_ppMom);
-							_dist_BackAlongTrajPP = ppStart.Dist(_iAlgo.Intersection(_TpcBox,ppDir,true));
+							_dist_BackAlongTrajPP = ppStart.Dist(_geoAlgo.Intersection(_TpcBox,ppDir,true)[0]);
 
 							if(_pp_tree)
 								_pp_tree->Fill();

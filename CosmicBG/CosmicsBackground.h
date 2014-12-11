@@ -15,8 +15,7 @@
 #ifndef LARLITE_COSMICSBACKGROUND_H
 #define LARLITE_COSMICSBACKGROUND_H
 
-#include "DistanceAlgo.h"
-#include "IntersectAlgo.h"
+#include "GeoAlgo.h"
 #include "Analysis/ana_base.h"
 #include "LArUtil/Geometry.h"
 #include "MCgetter.h"
@@ -144,11 +143,8 @@ namespace larlite {
 
 
 
-	// GeoAlgo for Distance Algos
-	geoalgo::DistanceAlgo _dAlgo;
-	// geoalgo for Intersection Algos
-	geoalgo::IntersectAlgo _iAlgo;
-	
+	// GeoAlgo
+	geoalgo::GeoAlgo _geoAlgo;
 	// TPC AABox object
 	geoalgo::AABox _TpcBox;
 

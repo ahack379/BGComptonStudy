@@ -16,9 +16,8 @@
 #define LARLITE_BGSHOWERINFO_H
 
 #include "Analysis/ana_base.h"
-#include "DistanceAlgo.h"
 #include "LArUtil/Geometry.h"
-#include "IntersectAlgo.h"
+#include "GeoAlgo.h"
 #include <vector>
 #include <string>
 
@@ -46,11 +45,8 @@ namespace larlite {
 
     protected:
 
-        // GeoAlgo for Distance Algos
-        geoalgo::DistanceAlgo _dAlgo;
-	// geoalgo for Intersection Algos
-	geoalgo::IntersectAlgo _iAlgo;
-	
+        // GeoAlgo
+        geoalgo::GeoAlgo _geoAlgo;
 	// TPC AABox object
 	geoalgo::AABox _TpcBox;
 
